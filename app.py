@@ -1,9 +1,10 @@
 import streamlit as st
 from supabase_client import supabase
+from datetime import date
+
 
 # ============================================================
-# BOOMATT ACADEMY
-# MASTER BRANDED PORTAL
+# BOOMATT ACADEMY — PROFESSIONAL PORTAL
 # ============================================================
 
 st.set_page_config(
@@ -13,314 +14,283 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
 # ============================================================
-# BOOMATT ACADEMY DESIGN SYSTEM
+# PROFESSIONAL DESIGN
 # ============================================================
 
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
+    /* ---------- GLOBAL ---------- */
 
-:root {
-    --navy: #10233F;
-    --blue: #2563EB;
-    --blue-light: #EFF6FF;
-    --green: #16A34A;
-    --gold: #F59E0B;
-    --background: #F7F9FC;
-    --white: #FFFFFF;
-    --text: #172033;
-    --muted: #667085;
-    --border: #E5EAF1;
-}
+    .stApp {
+        background: #F5F7FA;
+    }
 
-html, body, [class*="css"] {
-    font-family: "DM Sans", sans-serif;
-}
+    [data-testid="stHeader"] {
+        background: transparent;
+    }
 
-.stApp {
-    background: var(--background);
-}
+    [data-testid="stSidebar"] {
+        background: #0F2747;
+        border-right: none;
+    }
 
-.block-container {
-    max-width: 1450px;
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-}
+    [data-testid="stSidebar"] * {
+        color: white;
+    }
 
-h1, h2, h3, h4 {
-    font-family: "Manrope", sans-serif !important;
-    color: var(--navy) !important;
-}
+    .block-container {
+        max-width: 1400px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
 
-/* SIDEBAR */
+    h1, h2, h3 {
+        color: #102A43 !important;
+        font-weight: 700 !important;
+    }
 
-[data-testid="stSidebar"] {
-    background: var(--navy);
-}
+    p, label {
+        color: #52606D;
+    }
 
-[data-testid="stSidebar"] * {
-    color: white !important;
-}
 
-.boomatt-brand {
-    padding: 8px 4px 22px 4px;
-}
+    /* ---------- SIDEBAR ---------- */
 
-.boomatt-logo {
-    width: 50px;
-    height: 50px;
-    background: white;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 27px;
-    margin-bottom: 12px;
-}
+    .brand-box {
+        padding: 10px 5px 25px 5px;
+    }
 
-.boomatt-name {
-    color: white;
-    font-family: "Manrope", sans-serif;
-    font-size: 24px;
-    font-weight: 800;
-}
+    .brand-icon {
+        font-size: 38px;
+        margin-bottom: 8px;
+    }
 
-.boomatt-tagline {
-    color: rgba(255,255,255,0.70);
-    font-size: 12px;
-    line-height: 1.5;
-    margin-top: 5px;
-}
+    .brand-name {
+        font-size: 23px;
+        font-weight: 800;
+        color: white;
+        letter-spacing: -0.5px;
+    }
 
-/* HERO */
+    .brand-tagline {
+        font-size: 11px;
+        color: #B8C7D9;
+        line-height: 1.5;
+        margin-top: 5px;
+    }
 
-.hero {
-    background: linear-gradient(
-        135deg,
-        #10233F 0%,
-        #1D4ED8 100%
-    );
+    .portal-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.3px;
+        color: #9FB3C8;
+        margin-top: 12px;
+        margin-bottom: 15px;
+    }
 
-    border-radius: 22px;
-    padding: 32px;
-    margin-bottom: 25px;
 
-    box-shadow:
-        0 15px 35px rgba(16,35,63,0.13);
-}
+    /* ---------- DASHBOARD HERO ---------- */
 
-.hero h1 {
-    color: white !important;
-    font-size: 34px;
-    margin: 0 0 8px 0;
-}
+    .dashboard-hero {
+        background: #102A43;
+        border-radius: 18px;
+        padding: 30px 32px;
+        margin-bottom: 25px;
+    }
 
-.hero p {
-    color: rgba(255,255,255,0.85);
-    margin: 0;
-    font-size: 15px;
-}
+    .dashboard-hero-title {
+        color: white;
+        font-size: 30px;
+        font-weight: 750;
+        margin-bottom: 8px;
+    }
 
-/* METRIC CARDS */
+    .dashboard-hero-text {
+        color: #D9E2EC;
+        font-size: 14px;
+    }
 
-.metric-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 17px;
-    padding: 21px;
-    min-height: 125px;
-    box-shadow: 0 5px 18px rgba(16,35,63,0.045);
-}
 
-.metric-label {
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-}
+    /* ---------- METRICS ---------- */
 
-.metric-value {
-    color: var(--navy);
-    font-family: "Manrope", sans-serif;
-    font-size: 31px;
-    font-weight: 800;
-    margin-top: 7px;
-}
+    .metric-box {
+        background: white;
+        border: 1px solid #E4E7EB;
+        border-radius: 15px;
+        padding: 21px;
+        min-height: 125px;
+        box-shadow: 0 2px 8px rgba(16, 42, 67, 0.04);
+    }
 
-.metric-note {
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 4px;
-}
+    .metric-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #829AB1;
+        letter-spacing: 0.8px;
+    }
 
-/* QUICK CARDS */
+    .metric-number {
+        font-size: 30px;
+        font-weight: 800;
+        color: #102A43;
+        margin-top: 8px;
+    }
 
-.quick-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 19px;
-    min-height: 110px;
-    box-shadow: 0 5px 18px rgba(16,35,63,0.04);
-}
+    .metric-description {
+        font-size: 12px;
+        color: #7B8794;
+        margin-top: 3px;
+    }
 
-.quick-icon {
-    font-size: 24px;
-    margin-bottom: 8px;
-}
 
-.quick-title {
-    color: var(--navy);
-    font-weight: 800;
-    font-size: 14px;
-}
+    /* ---------- SECTION ---------- */
 
-.quick-text {
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 4px;
-}
+    .section-title {
+        font-size: 19px;
+        font-weight: 750;
+        color: #102A43;
+        margin-top: 28px;
+        margin-bottom: 14px;
+    }
 
-/* FORMS */
 
-[data-testid="stForm"] {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 17px;
-    padding: 23px;
-    box-shadow: 0 5px 18px rgba(16,35,63,0.03);
-}
+    /* ---------- QUICK ACTION CARDS ---------- */
 
-/* BUTTONS */
+    .action-box {
+        background: white;
+        border: 1px solid #E4E7EB;
+        border-radius: 15px;
+        padding: 20px;
+        min-height: 125px;
+        box-shadow: 0 2px 8px rgba(16, 42, 67, 0.035);
+    }
 
-div.stButton > button {
-    border-radius: 10px;
-    font-weight: 700;
-    min-height: 42px;
-}
+    .action-icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
 
-/* LOGIN */
+    .action-title {
+        color: #102A43;
+        font-size: 15px;
+        font-weight: 700;
+    }
 
-.login-container {
-    max-width: 500px;
-    margin: 7vh auto 0 auto;
-}
+    .action-text {
+        color: #7B8794;
+        font-size: 12px;
+        margin-top: 5px;
+    }
 
-.login-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 38px;
-    box-shadow: 0 20px 55px rgba(16,35,63,0.10);
-    text-align: center;
-}
 
-.login-icon {
-    width: 68px;
-    height: 68px;
-    background: var(--navy);
-    border-radius: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 34px;
-    margin-bottom: 15px;
-}
+    /* ---------- LOGIN ---------- */
 
-.login-title {
-    color: var(--navy);
-    font-family: "Manrope", sans-serif;
-    font-size: 29px;
-    font-weight: 800;
-}
+    .login-space {
+        height: 80px;
+    }
 
-.login-subtitle {
-    color: var(--muted);
-    font-size: 14px;
-    margin: 6px 0 25px 0;
-}
+    .login-brand {
+        text-align: center;
+        font-size: 45px;
+    }
 
-/* FOOTER */
+    .login-title {
+        text-align: center;
+        color: #102A43;
+        font-size: 31px;
+        font-weight: 800;
+    }
 
-.footer {
-    text-align: center;
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 40px;
-    padding: 20px;
-}
+    .login-subtitle {
+        text-align: center;
+        color: #7B8794;
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
 
-</style>
-""", unsafe_allow_html=True)
+
+    /* ---------- BUTTONS ---------- */
+
+    .stButton > button {
+        border-radius: 9px;
+        min-height: 42px;
+        font-weight: 650;
+    }
+
+
+    /* ---------- FORMS ---------- */
+
+    [data-testid="stForm"] {
+        background: white;
+        border: 1px solid #E4E7EB;
+        border-radius: 15px;
+        padding: 22px;
+    }
+
+
+    /* ---------- FOOTER ---------- */
+
+    .footer {
+        text-align: center;
+        color: #9FB3C8;
+        font-size: 11px;
+        padding-top: 35px;
+        padding-bottom: 15px;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
-# BRAND
+# HELPER FUNCTIONS
 # ============================================================
 
-def sidebar_brand(role):
+def current_email():
+    if "user" not in st.session_state:
+        return None
 
-    st.sidebar.markdown(
-        f"""
-        <div class="boomatt-brand">
+    return st.session_state.user.email
 
-            <div class="boomatt-logo">
-                📚
-            </div>
 
-            <div class="boomatt-name">
-                Boomatt Academy
-            </div>
+def logout():
+    try:
+        supabase.auth.sign_out()
+    except Exception:
+        pass
 
-            <div class="boomatt-tagline">
-                Building Confident Learners,<br>
-                One Lesson at a Time
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.sidebar.caption(role)
-
-    st.sidebar.divider()
+    st.session_state.clear()
+    st.rerun()
 
 
 def footer():
-
     st.markdown(
         """
         <div class="footer">
-            © 2026 Boomatt Academy
-            · Building Confident Learners, One Lesson at a Time
+            © 2026 Boomatt Academy · Building Confident Learners, One Lesson at a Time
         </div>
         """,
         unsafe_allow_html=True
     )
 
 
-def metric(label, value, note):
-
-    return f"""
-    <div class="metric-card">
-
-        <div class="metric-label">
-            {label}
+def metric_card(title, number, description):
+    st.markdown(
+        f"""
+        <div class="metric-box">
+            <div class="metric-title">{title}</div>
+            <div class="metric-number">{number}</div>
+            <div class="metric-description">{description}</div>
         </div>
-
-        <div class="metric-value">
-            {value}
-        </div>
-
-        <div class="metric-note">
-            {note}
-        </div>
-
-    </div>
-    """
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # ============================================================
@@ -329,102 +299,82 @@ def metric(label, value, note):
 
 def login():
 
-    st.markdown(
-        '<div class="login-container"><div class="login-card">',
-        unsafe_allow_html=True
-    )
+    st.markdown("<div class='login-space'></div>", unsafe_allow_html=True)
 
-    st.markdown(
-        """
-        <div class="login-icon">
-            📚
-        </div>
+    left, middle, right = st.columns([1, 2, 1])
 
-        <div class="login-title">
-            Boomatt Academy
-        </div>
+    with middle:
 
-        <div class="login-subtitle">
-            Building Confident Learners, One Lesson at a Time
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.markdown(
+            "<div class='login-brand'>📚</div>",
+            unsafe_allow_html=True
+        )
 
-    email = st.text_input(
-        "Email address",
-        placeholder="Enter your email"
-    )
+        st.markdown(
+            "<div class='login-title'>Boomatt Academy</div>",
+            unsafe_allow_html=True
+        )
 
-    password = st.text_input(
-        "Password",
-        type="password",
-        placeholder="Enter your password"
-    )
+        st.markdown(
+            """
+            <div class="login-subtitle">
+                Building Confident Learners, One Lesson at a Time
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    if st.button(
-        "Sign in to portal",
-        type="primary",
-        use_container_width=True
-    ):
+        with st.form("login_form"):
 
-        if not email or not password:
-
-            st.warning(
-                "Please enter your email and password."
+            email = st.text_input(
+                "Email address",
+                placeholder="Enter your email"
             )
 
-        else:
+            password = st.text_input(
+                "Password",
+                type="password",
+                placeholder="Enter your password"
+            )
 
-            try:
+            submitted = st.form_submit_button(
+                "Sign in",
+                type="primary",
+                use_container_width=True
+            )
 
-                response = (
-                    supabase
-                    .auth
-                    .sign_in_with_password({
-                        "email": email.strip().lower(),
-                        "password": password
-                    })
-                )
+            if submitted:
 
-                if response.user:
+                if not email or not password:
 
-                    st.session_state.user = response.user
+                    st.warning(
+                        "Please enter your email address and password."
+                    )
 
-                    st.rerun()
+                else:
 
-            except Exception as e:
+                    try:
 
-                st.error(
-                    f"Login failed: {e}"
-                )
+                        response = supabase.auth.sign_in_with_password(
+                            {
+                                "email": email.strip().lower(),
+                                "password": password
+                            }
+                        )
 
-    st.markdown(
-        "</div></div>",
-        unsafe_allow_html=True
-    )
+                        if response.user:
+
+                            st.session_state.user = response.user
+
+                            st.rerun()
+
+                    except Exception as e:
+
+                        st.error(
+                            f"Login failed: {e}"
+                        )
 
     footer()
-
-
-def logout():
-
-    try:
-        supabase.auth.sign_out()
-    except Exception:
-        pass
-
-    st.session_state.clear()
-
-    st.rerun()
-
-
-def current_email():
-
-    if "user" not in st.session_state:
-        return None
-
-    return st.session_state.user.email
 
 
 # ============================================================
@@ -442,15 +392,13 @@ def get_role():
 
     # Academy Director
     if email == "boomattolatunji@gmail.com":
-
         return "admin"
 
     # Current test tutor
     if email == "test@gmail.com":
-
         return "tutor"
 
-    # Other tutors
+    # Tutors registered in database
     try:
 
         result = (
@@ -463,7 +411,6 @@ def get_role():
         )
 
         if result.data:
-
             return "tutor"
 
     except Exception:
@@ -473,13 +420,36 @@ def get_role():
 
 
 # ============================================================
-# ADMIN NAVIGATION
+# SIDEBAR
 # ============================================================
 
-def admin_navigation():
+def admin_sidebar():
 
-    sidebar_brand(
-        "ACADEMY ADMINISTRATOR"
+    st.sidebar.markdown(
+        """
+        <div class="brand-box">
+
+            <div class="brand-icon">
+                📚
+            </div>
+
+            <div class="brand-name">
+                Boomatt Academy
+            </div>
+
+            <div class="brand-tagline">
+                Building Confident Learners,<br>
+                One Lesson at a Time
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.sidebar.markdown(
+        "<div class='portal-label'>ACADEMY ADMINISTRATOR</div>",
+        unsafe_allow_html=True
     )
 
     page = st.sidebar.radio(
@@ -502,7 +472,57 @@ def admin_navigation():
         "Log out",
         use_container_width=True
     ):
+        logout()
 
+    return page
+
+
+def tutor_sidebar():
+
+    st.sidebar.markdown(
+        """
+        <div class="brand-box">
+
+            <div class="brand-icon">
+                📚
+            </div>
+
+            <div class="brand-name">
+                Boomatt Academy
+            </div>
+
+            <div class="brand-tagline">
+                Building Confident Learners,<br>
+                One Lesson at a Time
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.sidebar.markdown(
+        "<div class='portal-label'>TUTOR PORTAL</div>",
+        unsafe_allow_html=True
+    )
+
+    page = st.sidebar.radio(
+        "Workspace",
+        [
+            "Dashboard",
+            "My Students",
+            "My Timetable",
+            "Attendance",
+            "Lesson Reports"
+        ]
+    )
+
+    st.sidebar.divider()
+
+    if st.sidebar.button(
+        "Log out",
+        use_container_width=True
+    ):
         logout()
 
     return page
@@ -516,16 +536,16 @@ def admin_dashboard():
 
     st.markdown(
         """
-        <div class="hero">
+        <div class="dashboard-hero">
 
-            <h1>
+            <div class="dashboard-hero-title">
                 Welcome back, Academy Director 👋
-            </h1>
+            </div>
 
-            <p>
-                Manage learners, tutors, lessons and
-                academy operations from one place.
-            </p>
+            <div class="dashboard-hero-text">
+                Manage learners, tutors, lessons and academy
+                operations from one place.
+            </div>
 
         </div>
         """,
@@ -564,41 +584,33 @@ def admin_dashboard():
 
         c1, c2, c3, c4 = st.columns(4)
 
-        c1.markdown(
-            metric(
+        with c1:
+            metric_card(
                 "STUDENTS",
                 len(students.data or []),
                 "Learners in the academy"
-            ),
-            unsafe_allow_html=True
-        )
+            )
 
-        c2.markdown(
-            metric(
+        with c2:
+            metric_card(
                 "TUTORS",
                 len(tutors.data or []),
                 "Teaching team"
-            ),
-            unsafe_allow_html=True
-        )
+            )
 
-        c3.markdown(
-            metric(
+        with c3:
+            metric_card(
                 "PARENTS",
                 len(parents.data or []),
                 "Parent records"
-            ),
-            unsafe_allow_html=True
-        )
+            )
 
-        c4.markdown(
-            metric(
+        with c4:
+            metric_card(
                 "LESSONS",
                 len(lessons.data or []),
                 "Timetable entries"
-            ),
-            unsafe_allow_html=True
-        )
+            )
 
     except Exception as e:
 
@@ -606,59 +618,57 @@ def admin_dashboard():
             f"Could not load dashboard: {e}"
         )
 
-    st.markdown("### Academy workspace")
+    st.markdown(
+        "<div class='section-title'>Academy workspace</div>",
+        unsafe_allow_html=True
+    )
 
-    a, b, c, d = st.columns(4)
+    c1, c2, c3, c4 = st.columns(4)
 
-    cards = [
-
+    actions = [
         (
-            a,
+            c1,
             "👨‍🎓",
             "Students",
             "Manage learner records."
         ),
-
         (
-            b,
+            c2,
             "👨‍🏫",
             "Tutors",
             "Manage your teaching team."
         ),
-
         (
-            c,
+            c3,
             "📅",
             "Timetable",
             "Organise lessons and schedules."
         ),
-
         (
-            d,
+            c4,
             "📖",
             "Reports",
             "Track teaching and learning."
         )
-
     ]
 
-    for column, icon, title, description in cards:
+    for column, icon, title, description in actions:
 
         with column:
 
             st.markdown(
                 f"""
-                <div class="quick-card">
+                <div class="action-box">
 
-                    <div class="quick-icon">
+                    <div class="action-icon">
                         {icon}
                     </div>
 
-                    <div class="quick-title">
+                    <div class="action-title">
                         {title}
                     </div>
 
-                    <div class="quick-text">
+                    <div class="action-text">
                         {description}
                     </div>
 
@@ -667,7 +677,10 @@ def admin_dashboard():
                 unsafe_allow_html=True
             )
 
-    st.markdown("### Recent timetable")
+    st.markdown(
+        "<div class='section-title'>Recent timetable</div>",
+        unsafe_allow_html=True
+    )
 
     try:
 
@@ -676,7 +689,7 @@ def admin_dashboard():
             .table("timetable")
             .select("*")
             .order("created_at", desc=True)
-            .limit(8)
+            .limit(10)
             .execute()
         )
 
@@ -691,7 +704,7 @@ def admin_dashboard():
         else:
 
             st.info(
-                "No timetable entries yet."
+                "No timetable entries have been added yet."
             )
 
     except Exception as e:
@@ -702,21 +715,21 @@ def admin_dashboard():
 
 
 # ============================================================
-# ADMIN — STUDENTS
+# STUDENTS
 # ============================================================
 
 def admin_students():
 
-    st.title("👨‍🎓 Students")
+    st.title("Students")
 
     st.caption(
-        "Create and review learner profiles."
+        "Create and manage learner profiles."
     )
 
     with st.form("student_form"):
 
         full_name = st.text_input(
-            "Student Name"
+            "Student name"
         )
 
         year_grade = st.text_input(
@@ -732,32 +745,41 @@ def admin_students():
         )
 
         submitted = st.form_submit_button(
-            "Add Student",
+            "Add student",
+            type="primary",
             use_container_width=True
         )
 
         if submitted:
 
-            try:
+            if not full_name:
 
-                supabase.table(
-                    "Student"
-                ).insert({
-                    "full_name": full_name,
-                    "year_grade": year_grade,
-                    "school": school,
-                    "subjects": subjects
-                }).execute()
-
-                st.success(
-                    f"{full_name} has been added successfully."
+                st.warning(
+                    "Please enter the student's name."
                 )
 
-            except Exception as e:
+            else:
 
-                st.error(
-                    f"Could not add student: {e}"
-                )
+                try:
+
+                    supabase.table("Student").insert(
+                        {
+                            "full_name": full_name,
+                            "year_grade": year_grade,
+                            "school": school,
+                            "subjects": subjects
+                        }
+                    ).execute()
+
+                    st.success(
+                        f"{full_name} has been added successfully."
+                    )
+
+                except Exception as e:
+
+                    st.error(
+                        f"Could not add student: {e}"
+                    )
 
     st.markdown("### Current students")
 
@@ -767,10 +789,7 @@ def admin_students():
             supabase
             .table("Student")
             .select("*")
-            .order(
-                "created_at",
-                desc=True
-            )
+            .order("created_at", desc=True)
             .execute()
         )
 
@@ -796,12 +815,12 @@ def admin_students():
 
 
 # ============================================================
-# ADMIN — TUTORS
+# TUTORS
 # ============================================================
 
 def admin_tutors():
 
-    st.title("👨‍🏫 Tutors")
+    st.title("Tutors")
 
     st.caption(
         "Manage the Boomatt Academy teaching team."
@@ -810,11 +829,11 @@ def admin_tutors():
     with st.form("tutor_form"):
 
         full_name = st.text_input(
-            "Tutor Name"
+            "Tutor name"
         )
 
         email = st.text_input(
-            "Tutor Email"
+            "Tutor email"
         )
 
         subjects = st.text_input(
@@ -826,32 +845,41 @@ def admin_tutors():
         )
 
         submitted = st.form_submit_button(
-            "Add Tutor",
+            "Add tutor",
+            type="primary",
             use_container_width=True
         )
 
         if submitted:
 
-            try:
+            if not full_name or not email:
 
-                supabase.table(
-                    "tutors"
-                ).insert({
-                    "full_name": full_name,
-                    "email": email.lower().strip(),
-                    "subjects": subjects,
-                    "qualification": qualification
-                }).execute()
-
-                st.success(
-                    f"{full_name} has been added successfully."
+                st.warning(
+                    "Please enter the tutor's name and email."
                 )
 
-            except Exception as e:
+            else:
 
-                st.error(
-                    f"Could not add tutor: {e}"
-                )
+                try:
+
+                    supabase.table("tutors").insert(
+                        {
+                            "full_name": full_name,
+                            "email": email.lower().strip(),
+                            "subjects": subjects,
+                            "qualification": qualification
+                        }
+                    ).execute()
+
+                    st.success(
+                        f"{full_name} has been added successfully."
+                    )
+
+                except Exception as e:
+
+                    st.error(
+                        f"Could not add tutor: {e}"
+                    )
 
     st.markdown("### Current tutors")
 
@@ -861,10 +889,7 @@ def admin_tutors():
             supabase
             .table("tutors")
             .select("*")
-            .order(
-                "created_at",
-                desc=True
-            )
+            .order("created_at", desc=True)
             .execute()
         )
 
@@ -890,12 +915,12 @@ def admin_tutors():
 
 
 # ============================================================
-# ADMIN — PARENTS
+# PARENTS
 # ============================================================
 
 def admin_parents():
 
-    st.title("👨‍👩‍👧 Parents")
+    st.title("Parents")
 
     st.caption(
         "Manage parent and guardian records."
@@ -904,7 +929,7 @@ def admin_parents():
     with st.form("parent_form"):
 
         full_name = st.text_input(
-            "Parent Name"
+            "Parent name"
         )
 
         email = st.text_input(
@@ -916,31 +941,40 @@ def admin_parents():
         )
 
         submitted = st.form_submit_button(
-            "Add Parent",
+            "Add parent",
+            type="primary",
             use_container_width=True
         )
 
         if submitted:
 
-            try:
+            if not full_name:
 
-                supabase.table(
-                    "parents"
-                ).insert({
-                    "full_name": full_name,
-                    "email": email,
-                    "phone": phone
-                }).execute()
-
-                st.success(
-                    f"{full_name} has been added successfully."
+                st.warning(
+                    "Please enter the parent's name."
                 )
 
-            except Exception as e:
+            else:
 
-                st.error(
-                    f"Could not add parent: {e}"
-                )
+                try:
+
+                    supabase.table("parents").insert(
+                        {
+                            "full_name": full_name,
+                            "email": email,
+                            "phone": phone
+                        }
+                    ).execute()
+
+                    st.success(
+                        f"{full_name} has been added successfully."
+                    )
+
+                except Exception as e:
+
+                    st.error(
+                        f"Could not add parent: {e}"
+                    )
 
     st.markdown("### Current parents")
 
@@ -950,10 +984,7 @@ def admin_parents():
             supabase
             .table("parents")
             .select("*")
-            .order(
-                "created_at",
-                desc=True
-            )
+            .order("created_at", desc=True)
             .execute()
         )
 
@@ -979,25 +1010,25 @@ def admin_parents():
 
 
 # ============================================================
-# ADMIN — TIMETABLE
+# TIMETABLE
 # ============================================================
 
 def admin_timetable():
 
-    st.title("📅 Timetable")
+    st.title("Timetable")
 
     st.caption(
-        "Create and review lesson schedules."
+        "Create and manage academy lesson schedules."
     )
 
     with st.form("timetable_form"):
 
         student_name = st.text_input(
-            "Student Name"
+            "Student name"
         )
 
         tutor_name = st.text_input(
-            "Tutor Name"
+            "Tutor name"
         )
 
         subject = st.text_input(
@@ -1017,13 +1048,21 @@ def admin_timetable():
             ]
         )
 
-        start_time = st.text_input(
-            "Start Time"
-        )
+        c1, c2 = st.columns(2)
 
-        end_time = st.text_input(
-            "End Time"
-        )
+        with c1:
+
+            start_time = st.text_input(
+                "Start time",
+                placeholder="6:00 PM"
+            )
+
+        with c2:
+
+            end_time = st.text_input(
+                "End time",
+                placeholder="7:00 PM"
+            )
 
         status = st.selectbox(
             "Status",
@@ -1036,7 +1075,8 @@ def admin_timetable():
         )
 
         submitted = st.form_submit_button(
-            "Add Timetable Entry",
+            "Add timetable entry",
+            type="primary",
             use_container_width=True
         )
 
@@ -1044,17 +1084,17 @@ def admin_timetable():
 
             try:
 
-                supabase.table(
-                    "timetable"
-                ).insert({
-                    "student_name": student_name,
-                    "tutor_name": tutor_name,
-                    "subject": subject,
-                    "day": day,
-                    "start_time": start_time,
-                    "end_time": end_time,
-                    "status": status
-                }).execute()
+                supabase.table("timetable").insert(
+                    {
+                        "student_name": student_name,
+                        "tutor_name": tutor_name,
+                        "subject": subject,
+                        "day": day,
+                        "start_time": start_time,
+                        "end_time": end_time,
+                        "status": status
+                    }
+                ).execute()
 
                 st.success(
                     "Timetable entry added successfully."
@@ -1074,10 +1114,7 @@ def admin_timetable():
             supabase
             .table("timetable")
             .select("*")
-            .order(
-                "created_at",
-                desc=True
-            )
+            .order("created_at", desc=True)
             .execute()
         )
 
@@ -1103,25 +1140,25 @@ def admin_timetable():
 
 
 # ============================================================
-# ADMIN — ATTENDANCE
+# ATTENDANCE
 # ============================================================
 
 def admin_attendance():
 
-    st.title("📝 Attendance")
+    st.title("Attendance")
 
     st.caption(
-        "Record and review lesson attendance."
+        "Record and monitor lesson attendance."
     )
 
     with st.form("attendance_form"):
 
         student_name = st.text_input(
-            "Student Name"
+            "Student name"
         )
 
         tutor_name = st.text_input(
-            "Tutor Name"
+            "Tutor name"
         )
 
         subject = st.text_input(
@@ -1129,7 +1166,8 @@ def admin_attendance():
         )
 
         lesson_date = st.date_input(
-            "Lesson Date"
+            "Lesson date",
+            value=date.today()
         )
 
         status = st.selectbox(
@@ -1146,7 +1184,8 @@ def admin_attendance():
         )
 
         submitted = st.form_submit_button(
-            "Save Attendance",
+            "Save attendance",
+            type="primary",
             use_container_width=True
         )
 
@@ -1154,16 +1193,16 @@ def admin_attendance():
 
             try:
 
-                supabase.table(
-                    "attendance"
-                ).insert({
-                    "student_name": student_name,
-                    "tutor_name": tutor_name,
-                    "subject": subject,
-                    "lesson_date": str(lesson_date),
-                    "status": status,
-                    "notes": notes
-                }).execute()
+                supabase.table("attendance").insert(
+                    {
+                        "student_name": student_name,
+                        "tutor_name": tutor_name,
+                        "subject": subject,
+                        "lesson_date": str(lesson_date),
+                        "status": status,
+                        "notes": notes
+                    }
+                ).execute()
 
                 st.success(
                     "Attendance saved successfully."
@@ -1183,10 +1222,7 @@ def admin_attendance():
             supabase
             .table("attendance")
             .select("*")
-            .order(
-                "lesson_date",
-                desc=True
-            )
+            .order("lesson_date", desc=True)
             .execute()
         )
 
@@ -1212,25 +1248,25 @@ def admin_attendance():
 
 
 # ============================================================
-# ADMIN — LESSON REPORTS
+# LESSON REPORTS
 # ============================================================
 
 def admin_reports():
 
-    st.title("📖 Lesson Reports")
+    st.title("Lesson Reports")
 
     st.caption(
-        "Review and manage teaching reports."
+        "Review teaching, learning progress and homework."
     )
 
     with st.form("lesson_report_form"):
 
         student_name = st.text_input(
-            "Student Name"
+            "Student name"
         )
 
         tutor_name = st.text_input(
-            "Tutor Name"
+            "Tutor name"
         )
 
         subject = st.text_input(
@@ -1238,7 +1274,8 @@ def admin_reports():
         )
 
         lesson_date = st.date_input(
-            "Lesson Date"
+            "Lesson date",
+            value=date.today()
         )
 
         topic = st.text_input(
@@ -1246,7 +1283,7 @@ def admin_reports():
         )
 
         lesson_summary = st.text_area(
-            "Lesson Summary"
+            "Lesson summary"
         )
 
         homework = st.text_area(
@@ -1254,11 +1291,12 @@ def admin_reports():
         )
 
         areas_to_improve = st.text_area(
-            "Areas to Improve"
+            "Areas to improve"
         )
 
         submitted = st.form_submit_button(
-            "Save Lesson Report",
+            "Save lesson report",
+            type="primary",
             use_container_width=True
         )
 
@@ -1266,18 +1304,18 @@ def admin_reports():
 
             try:
 
-                supabase.table(
-                    "lesson_reports"
-                ).insert({
-                    "student_name": student_name,
-                    "tutor_name": tutor_name,
-                    "subject": subject,
-                    "lesson_date": str(lesson_date),
-                    "topic": topic,
-                    "lesson_summary": lesson_summary,
-                    "homework": homework,
-                    "areas_to_improve": areas_to_improve
-                }).execute()
+                supabase.table("lesson_reports").insert(
+                    {
+                        "student_name": student_name,
+                        "tutor_name": tutor_name,
+                        "subject": subject,
+                        "lesson_date": str(lesson_date),
+                        "topic": topic,
+                        "lesson_summary": lesson_summary,
+                        "homework": homework,
+                        "areas_to_improve": areas_to_improve
+                    }
+                ).execute()
 
                 st.success(
                     "Lesson report saved successfully."
@@ -1297,10 +1335,7 @@ def admin_reports():
             supabase
             .table("lesson_reports")
             .select("*")
-            .order(
-                "lesson_date",
-                desc=True
-            )
+            .order("lesson_date", desc=True)
             .execute()
         )
 
@@ -1326,12 +1361,12 @@ def admin_reports():
 
 
 # ============================================================
-# ADMIN — PAYMENTS
+# PAYMENTS
 # ============================================================
 
 def admin_payments():
 
-    st.title("💳 Payments")
+    st.title("Payments")
 
     st.caption(
         "Track academy payment records."
@@ -1340,25 +1375,26 @@ def admin_payments():
     with st.form("payment_form"):
 
         parent_name = st.text_input(
-            "Parent Name"
+            "Parent name"
         )
 
         student_name = st.text_input(
-            "Student Name"
+            "Student name"
         )
 
         amount = st.number_input(
             "Amount",
             min_value=0.0,
-            step=100.0
+            step=500.0
         )
 
         payment_date = st.date_input(
-            "Payment Date"
+            "Payment date",
+            value=date.today()
         )
 
         status = st.selectbox(
-            "Payment Status",
+            "Payment status",
             [
                 "Paid",
                 "Pending",
@@ -1367,7 +1403,7 @@ def admin_payments():
         )
 
         payment_reference = st.text_input(
-            "Payment Reference"
+            "Payment reference"
         )
 
         notes = st.text_area(
@@ -1375,7 +1411,8 @@ def admin_payments():
         )
 
         submitted = st.form_submit_button(
-            "Save Payment",
+            "Save payment",
+            type="primary",
             use_container_width=True
         )
 
@@ -1383,17 +1420,17 @@ def admin_payments():
 
             try:
 
-                supabase.table(
-                    "payments"
-                ).insert({
-                    "parent_name": parent_name,
-                    "student_name": student_name,
-                    "amount": amount,
-                    "payment_date": str(payment_date),
-                    "status": status,
-                    "payment_reference": payment_reference,
-                    "notes": notes
-                }).execute()
+                supabase.table("payments").insert(
+                    {
+                        "parent_name": parent_name,
+                        "student_name": student_name,
+                        "amount": amount,
+                        "payment_date": str(payment_date),
+                        "status": status,
+                        "payment_reference": payment_reference,
+                        "notes": notes
+                    }
+                ).execute()
 
                 st.success(
                     "Payment saved successfully."
@@ -1413,10 +1450,7 @@ def admin_payments():
             supabase
             .table("payments")
             .select("*")
-            .order(
-                "payment_date",
-                desc=True
-            )
+            .order("payment_date", desc=True)
             .execute()
         )
 
@@ -1447,7 +1481,7 @@ def admin_payments():
 
 def admin_portal():
 
-    page = admin_navigation()
+    page = admin_sidebar()
 
     if page == "Dashboard":
         admin_dashboard()
@@ -1477,37 +1511,8 @@ def admin_portal():
 
 
 # ============================================================
-# TUTOR
+# TUTOR PROFILE
 # ============================================================
-
-def tutor_navigation():
-
-    sidebar_brand(
-        "TUTOR PORTAL"
-    )
-
-    page = st.sidebar.radio(
-        "Workspace",
-        [
-            "Dashboard",
-            "My Students",
-            "My Timetable",
-            "Attendance",
-            "Lesson Reports"
-        ]
-    )
-
-    st.sidebar.divider()
-
-    if st.sidebar.button(
-        "Log out",
-        use_container_width=True
-    ):
-
-        logout()
-
-    return page
-
 
 def tutor_profile():
 
@@ -1522,16 +1527,12 @@ def tutor_profile():
             supabase
             .table("tutors")
             .select("*")
-            .eq(
-                "email",
-                email.lower().strip()
-            )
+            .eq("email", email.lower().strip())
             .limit(1)
             .execute()
         )
 
         if result.data:
-
             return result.data[0]
 
     except Exception as e:
@@ -1543,6 +1544,10 @@ def tutor_profile():
     return None
 
 
+# ============================================================
+# TUTOR DASHBOARD
+# ============================================================
+
 def tutor_dashboard(tutor):
 
     tutor_name = tutor.get(
@@ -1552,16 +1557,15 @@ def tutor_dashboard(tutor):
 
     st.markdown(
         f"""
-        <div class="hero">
+        <div class="dashboard-hero">
 
-            <h1>
+            <div class="dashboard-hero-title">
                 Welcome, {tutor_name} 👋
-            </h1>
+            </div>
 
-            <p>
-                Your Boomatt Academy teaching workspace
-                is ready for today's lessons.
-            </p>
+            <div class="dashboard-hero-text">
+                Your Boomatt Academy teaching workspace.
+            </div>
 
         </div>
         """,
@@ -1573,61 +1577,47 @@ def tutor_dashboard(tutor):
         timetable = (
             supabase
             .table("timetable")
-            .select("student_name")
-            .eq(
-                "tutor_name",
-                tutor_name
-            )
+            .select("*")
+            .eq("tutor_name", tutor_name)
             .execute()
         )
 
         students = {
-            x.get("student_name")
-            for x in (
-                timetable.data or []
-            )
-            if x.get("student_name")
+            item.get("student_name")
+            for item in (timetable.data or [])
+            if item.get("student_name")
         }
 
         reports = (
             supabase
             .table("lesson_reports")
             .select("id")
-            .eq(
-                "tutor_name",
-                tutor_name
-            )
+            .eq("tutor_name", tutor_name)
             .execute()
         )
 
         c1, c2, c3 = st.columns(3)
 
-        c1.markdown(
-            metric(
+        with c1:
+            metric_card(
                 "MY STUDENTS",
                 len(students),
                 "Learners assigned to you"
-            ),
-            unsafe_allow_html=True
-        )
+            )
 
-        c2.markdown(
-            metric(
+        with c2:
+            metric_card(
                 "MY LESSONS",
                 len(timetable.data or []),
                 "Scheduled lessons"
-            ),
-            unsafe_allow_html=True
-        )
+            )
 
-        c3.markdown(
-            metric(
-                "LESSON REPORTS",
+        with c3:
+            metric_card(
+                "REPORTS",
                 len(reports.data or []),
                 "Reports submitted"
-            ),
-            unsafe_allow_html=True
-        )
+            )
 
     except Exception as e:
 
@@ -1635,52 +1625,51 @@ def tutor_dashboard(tutor):
             f"Could not load tutor overview: {e}"
         )
 
-    st.markdown("### Your workspace")
+    st.markdown(
+        "<div class='section-title'>Your workspace</div>",
+        unsafe_allow_html=True
+    )
 
-    a, b, c = st.columns(3)
+    c1, c2, c3 = st.columns(3)
 
-    cards = [
-
+    actions = [
         (
-            a,
+            c1,
             "👨‍🎓",
             "My Students",
             "View learners assigned to you."
         ),
-
         (
-            b,
+            c2,
             "📅",
             "My Timetable",
             "View your teaching schedule."
         ),
-
         (
-            c,
+            c3,
             "📝",
             "Lesson Reports",
             "Record learning and homework."
         )
-
     ]
 
-    for column, icon, title, description in cards:
+    for column, icon, title, description in actions:
 
         with column:
 
             st.markdown(
                 f"""
-                <div class="quick-card">
+                <div class="action-box">
 
-                    <div class="quick-icon">
+                    <div class="action-icon">
                         {icon}
                     </div>
 
-                    <div class="quick-title">
+                    <div class="action-title">
                         {title}
                     </div>
 
-                    <div class="quick-text">
+                    <div class="action-text">
                         {description}
                     </div>
 
@@ -1690,6 +1679,10 @@ def tutor_dashboard(tutor):
             )
 
 
+# ============================================================
+# TUTOR STUDENTS
+# ============================================================
+
 def tutor_students(tutor):
 
     tutor_name = tutor.get(
@@ -1697,7 +1690,7 @@ def tutor_students(tutor):
         ""
     )
 
-    st.title("👨‍🎓 My Students")
+    st.title("My Students")
 
     st.caption(
         "Learners currently assigned to your timetable."
@@ -1709,20 +1702,17 @@ def tutor_students(tutor):
             supabase
             .table("timetable")
             .select("*")
-            .eq(
-                "tutor_name",
-                tutor_name
-            )
+            .eq("tutor_name", tutor_name)
             .execute()
         )
 
-        students = sorted({
-            x.get("student_name")
-            for x in (
-                result.data or []
-            )
-            if x.get("student_name")
-        })
+        students = sorted(
+            {
+                item.get("student_name")
+                for item in (result.data or [])
+                if item.get("student_name")
+            }
+        )
 
         if not students:
 
@@ -1736,9 +1726,7 @@ def tutor_students(tutor):
 
             with st.container(border=True):
 
-                st.markdown(
-                    f"### 👤 {student}"
-                )
+                st.subheader(student)
 
                 try:
 
@@ -1746,10 +1734,7 @@ def tutor_students(tutor):
                         supabase
                         .table("Student")
                         .select("*")
-                        .eq(
-                            "full_name",
-                            student
-                        )
+                        .eq("full_name", student)
                         .limit(1)
                         .execute()
                     )
@@ -1760,20 +1745,23 @@ def tutor_students(tutor):
 
                         c1, c2, c3 = st.columns(3)
 
-                        c1.write(
-                            f"**Year / Grade**\n\n"
-                            f"{data.get('year_grade', '')}"
-                        )
+                        with c1:
+                            st.write(
+                                f"**Year / Grade**\n\n"
+                                f"{data.get('year_grade', '')}"
+                            )
 
-                        c2.write(
-                            f"**School**\n\n"
-                            f"{data.get('school', '')}"
-                        )
+                        with c2:
+                            st.write(
+                                f"**School**\n\n"
+                                f"{data.get('school', '')}"
+                            )
 
-                        c3.write(
-                            f"**Subjects**\n\n"
-                            f"{data.get('subjects', '')}"
-                        )
+                        with c3:
+                            st.write(
+                                f"**Subjects**\n\n"
+                                f"{data.get('subjects', '')}"
+                            )
 
                 except Exception:
                     pass
@@ -1785,6 +1773,10 @@ def tutor_students(tutor):
         )
 
 
+# ============================================================
+# TUTOR TIMETABLE
+# ============================================================
+
 def tutor_timetable(tutor):
 
     tutor_name = tutor.get(
@@ -1792,7 +1784,7 @@ def tutor_timetable(tutor):
         ""
     )
 
-    st.title("📅 My Timetable")
+    st.title("My Timetable")
 
     st.caption(
         "Your assigned teaching schedule."
@@ -1804,14 +1796,8 @@ def tutor_timetable(tutor):
             supabase
             .table("timetable")
             .select("*")
-            .eq(
-                "tutor_name",
-                tutor_name
-            )
-            .order(
-                "created_at",
-                desc=False
-            )
+            .eq("tutor_name", tutor_name)
+            .order("created_at", desc=False)
             .execute()
         )
 
@@ -1836,6 +1822,10 @@ def tutor_timetable(tutor):
         )
 
 
+# ============================================================
+# TUTOR ATTENDANCE
+# ============================================================
+
 def tutor_attendance(tutor):
 
     tutor_name = tutor.get(
@@ -1843,7 +1833,7 @@ def tutor_attendance(tutor):
         ""
     )
 
-    st.title("📝 Attendance")
+    st.title("Attendance")
 
     st.caption(
         "Record attendance for your lessons."
@@ -1852,7 +1842,7 @@ def tutor_attendance(tutor):
     with st.form("tutor_attendance_form"):
 
         student_name = st.text_input(
-            "Student Name"
+            "Student name"
         )
 
         subject = st.text_input(
@@ -1860,7 +1850,8 @@ def tutor_attendance(tutor):
         )
 
         lesson_date = st.date_input(
-            "Lesson Date"
+            "Lesson date",
+            value=date.today()
         )
 
         status = st.selectbox(
@@ -1877,7 +1868,8 @@ def tutor_attendance(tutor):
         )
 
         submitted = st.form_submit_button(
-            "Save Attendance",
+            "Save attendance",
+            type="primary",
             use_container_width=True
         )
 
@@ -1885,16 +1877,16 @@ def tutor_attendance(tutor):
 
             try:
 
-                supabase.table(
-                    "attendance"
-                ).insert({
-                    "student_name": student_name,
-                    "tutor_name": tutor_name,
-                    "subject": subject,
-                    "lesson_date": str(lesson_date),
-                    "status": status,
-                    "notes": notes
-                }).execute()
+                supabase.table("attendance").insert(
+                    {
+                        "student_name": student_name,
+                        "tutor_name": tutor_name,
+                        "subject": subject,
+                        "lesson_date": str(lesson_date),
+                        "status": status,
+                        "notes": notes
+                    }
+                ).execute()
 
                 st.success(
                     "Attendance saved successfully."
@@ -1914,14 +1906,8 @@ def tutor_attendance(tutor):
             supabase
             .table("attendance")
             .select("*")
-            .eq(
-                "tutor_name",
-                tutor_name
-            )
-            .order(
-                "lesson_date",
-                desc=True
-            )
+            .eq("tutor_name", tutor_name)
+            .order("lesson_date", desc=True)
             .execute()
         )
 
@@ -1946,6 +1932,10 @@ def tutor_attendance(tutor):
         )
 
 
+# ============================================================
+# TUTOR REPORTS
+# ============================================================
+
 def tutor_reports(tutor):
 
     tutor_name = tutor.get(
@@ -1953,7 +1943,7 @@ def tutor_reports(tutor):
         ""
     )
 
-    st.title("📖 Lesson Reports")
+    st.title("Lesson Reports")
 
     st.caption(
         "Record what was taught, learner progress and homework."
@@ -1962,7 +1952,7 @@ def tutor_reports(tutor):
     with st.form("tutor_report_form"):
 
         student_name = st.text_input(
-            "Student Name"
+            "Student name"
         )
 
         subject = st.text_input(
@@ -1970,7 +1960,8 @@ def tutor_reports(tutor):
         )
 
         lesson_date = st.date_input(
-            "Lesson Date"
+            "Lesson date",
+            value=date.today()
         )
 
         topic = st.text_input(
@@ -1978,7 +1969,7 @@ def tutor_reports(tutor):
         )
 
         lesson_summary = st.text_area(
-            "Lesson Summary"
+            "Lesson summary"
         )
 
         homework = st.text_area(
@@ -1986,11 +1977,12 @@ def tutor_reports(tutor):
         )
 
         areas_to_improve = st.text_area(
-            "Areas to Improve"
+            "Areas to improve"
         )
 
         submitted = st.form_submit_button(
-            "Submit Lesson Report",
+            "Submit lesson report",
+            type="primary",
             use_container_width=True
         )
 
@@ -1998,18 +1990,18 @@ def tutor_reports(tutor):
 
             try:
 
-                supabase.table(
-                    "lesson_reports"
-                ).insert({
-                    "student_name": student_name,
-                    "tutor_name": tutor_name,
-                    "subject": subject,
-                    "lesson_date": str(lesson_date),
-                    "topic": topic,
-                    "lesson_summary": lesson_summary,
-                    "homework": homework,
-                    "areas_to_improve": areas_to_improve
-                }).execute()
+                supabase.table("lesson_reports").insert(
+                    {
+                        "student_name": student_name,
+                        "tutor_name": tutor_name,
+                        "subject": subject,
+                        "lesson_date": str(lesson_date),
+                        "topic": topic,
+                        "lesson_summary": lesson_summary,
+                        "homework": homework,
+                        "areas_to_improve": areas_to_improve
+                    }
+                ).execute()
 
                 st.success(
                     "Lesson report submitted successfully."
@@ -2029,14 +2021,8 @@ def tutor_reports(tutor):
             supabase
             .table("lesson_reports")
             .select("*")
-            .eq(
-                "tutor_name",
-                tutor_name
-            )
-            .order(
-                "lesson_date",
-                desc=True
-            )
+            .eq("tutor_name", tutor_name)
+            .order("lesson_date", desc=True)
             .execute()
         )
 
@@ -2081,7 +2067,7 @@ def tutor_portal():
 
         return
 
-    page = tutor_navigation()
+    page = tutor_sidebar()
 
     if page == "Dashboard":
 
@@ -2107,7 +2093,7 @@ def tutor_portal():
 
 
 # ============================================================
-# MAIN APPLICATION
+# APPLICATION ENTRY
 # ============================================================
 
 if "user" not in st.session_state:
@@ -2128,7 +2114,7 @@ else:
 
     else:
 
-        st.title("📚 Boomatt Academy")
+        st.title("Boomatt Academy")
 
         st.error(
             "This account has not been assigned a portal role."
