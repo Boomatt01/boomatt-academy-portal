@@ -2,20 +2,14 @@ import streamlit as st
 from supabase_client import supabase
 from datetime import date
 
-
-# =========================================================
-# PAGE SETTINGS
-# =========================================================
-
 st.set_page_config(
     page_title="Boomatt Academy Portal",
     page_icon="📚",
     layout="wide"
 )
 
-
 # =========================================================
-# SESSION STATE
+# SESSION
 # =========================================================
 
 if "user" not in st.session_state:
@@ -23,7 +17,7 @@ if "user" not in st.session_state:
 
 
 # =========================================================
-# LOGIN PAGE
+# LOGIN
 # =========================================================
 
 def login_page():
@@ -79,7 +73,7 @@ def logout():
 
 
 # =========================================================
-# GET CURRENT USER
+# CURRENT USER
 # =========================================================
 
 def get_current_email():
@@ -90,29 +84,38 @@ def get_current_email():
     return None
 
 
+def get_current_user_id():
+
+    if st.session_state.user:
+        return st.session_state.user.id
+
+    return None
+
+
 # =========================================================
-# DETERMINE ROLE
+# ROLE DETECTION
 # =========================================================
 
 def get_user_role():
 
     email = get_current_email()
+    user_id = get_current_user_id()
 
-    if not email:
+    if not email or not user_id:
         return None
 
-    # Academy Director / Admin
+    # Academy Director
     if email.lower() == "boomattolatunji@gmail.com":
         return "admin"
 
-    # Check whether the logged-in user belongs to a tutor
+    # Check tutor by Supabase Auth User ID
     try:
 
         result = (
             supabase
             .table("tutors")
             .select("*")
-            .eq("email", email)
+            .eq("user_id", user_id)
             .limit(1)
             .execute()
         )
@@ -120,14 +123,16 @@ def get_user_role():
         if result.data:
             return "tutor"
 
-    except:
-        pass
+    except Exception as e:
+
+        st.error(f"Could not determine your portal role: {e}")
+        return None
 
     return "unknown"
 
 
 # =========================================================
-# ADMIN DASHBOARD
+# ADMIN PORTAL
 # =========================================================
 
 def admin_dashboard():
@@ -166,6 +171,7 @@ def admin_dashboard():
         st.header("📊 Dashboard")
 
         try:
+
             students = supabase.table("Student").select("id").execute()
             tutors = supabase.table("tutors").select("id").execute()
             parents = supabase.table("parents").select("id").execute()
@@ -210,11 +216,15 @@ def admin_dashboard():
                         "subjects": subjects
                     }).execute()
 
-                    st.success(f"{name} has been added successfully.")
+                    st.success(
+                        f"{name} has been added successfully."
+                    )
 
                 except Exception as e:
 
-                    st.error(f"Could not add student: {e}")
+                    st.error(
+                        f"Could not add student: {e}"
+                    )
 
         st.divider()
 
@@ -229,13 +239,18 @@ def admin_dashboard():
             )
 
             if result.data:
-                st.dataframe(result.data, use_container_width=True)
+                st.dataframe(
+                    result.data,
+                    use_container_width=True
+                )
             else:
                 st.info("No students found.")
 
         except Exception as e:
 
-            st.error(f"Could not load students: {e}")
+            st.error(
+                f"Could not load students: {e}"
+            )
 
     # =====================================================
     # TUTORS
@@ -265,11 +280,15 @@ def admin_dashboard():
                         "qualification": qualification
                     }).execute()
 
-                    st.success(f"{name} has been added successfully.")
+                    st.success(
+                        f"{name} has been added successfully."
+                    )
 
                 except Exception as e:
 
-                    st.error(f"Could not add tutor: {e}")
+                    st.error(
+                        f"Could not add tutor: {e}"
+                    )
 
         st.divider()
 
@@ -284,13 +303,18 @@ def admin_dashboard():
             )
 
             if result.data:
-                st.dataframe(result.data, use_container_width=True)
+                st.dataframe(
+                    result.data,
+                    use_container_width=True
+                )
             else:
                 st.info("No tutors found.")
 
         except Exception as e:
 
-            st.error(f"Could not load tutors: {e}")
+            st.error(
+                f"Could not load tutors: {e}"
+            )
 
     # =====================================================
     # PARENTS
@@ -306,7 +330,9 @@ def admin_dashboard():
             email = st.text_input("Email")
             phone = st.text_input("Phone")
 
-            submitted = st.form_submit_button("Add Parent")
+            submitted = st.form_submit_button(
+                "Add Parent"
+            )
 
             if submitted:
 
@@ -318,11 +344,15 @@ def admin_dashboard():
                         "phone": phone
                     }).execute()
 
-                    st.success(f"{name} has been added successfully.")
+                    st.success(
+                        f"{name} has been added successfully."
+                    )
 
                 except Exception as e:
 
-                    st.error(f"Could not add parent: {e}")
+                    st.error(
+                        f"Could not add parent: {e}"
+                    )
 
         st.divider()
 
@@ -337,13 +367,18 @@ def admin_dashboard():
             )
 
             if result.data:
-                st.dataframe(result.data, use_container_width=True)
+                st.dataframe(
+                    result.data,
+                    use_container_width=True
+                )
             else:
                 st.info("No parents found.")
 
         except Exception as e:
 
-            st.error(f"Could not load parents: {e}")
+            st.error(
+                f"Could not load parents: {e}"
+            )
 
     # =====================================================
     # TIMETABLE
@@ -358,6 +393,7 @@ def admin_dashboard():
             student_name = st.text_input("Student")
             tutor_name = st.text_input("Tutor")
             subject = st.text_input("Subject")
+
             day = st.selectbox(
                 "Day",
                 [
@@ -376,7 +412,11 @@ def admin_dashboard():
 
             status = st.selectbox(
                 "Status",
-                ["Scheduled", "Completed", "Cancelled"]
+                [
+                    "Scheduled",
+                    "Completed",
+                    "Cancelled"
+                ]
             )
 
             submitted = st.form_submit_button(
@@ -397,11 +437,15 @@ def admin_dashboard():
                         "status": status
                     }).execute()
 
-                    st.success("Timetable entry added successfully.")
+                    st.success(
+                        "Timetable entry added successfully."
+                    )
 
                 except Exception as e:
 
-                    st.error(f"Could not add timetable entry: {e}")
+                    st.error(
+                        f"Could not add timetable entry: {e}"
+                    )
 
         st.divider()
 
@@ -416,13 +460,20 @@ def admin_dashboard():
             )
 
             if result.data:
-                st.dataframe(result.data, use_container_width=True)
+                st.dataframe(
+                    result.data,
+                    use_container_width=True
+                )
             else:
-                st.info("No timetable entries found.")
+                st.info(
+                    "No timetable entries found."
+                )
 
         except Exception as e:
 
-            st.error(f"Could not load timetable: {e}")
+            st.error(
+                f"Could not load timetable: {e}"
+            )
 
     # =====================================================
     # ATTENDANCE
@@ -437,11 +488,20 @@ def admin_dashboard():
             student_name = st.text_input("Student")
             tutor_name = st.text_input("Tutor")
             subject = st.text_input("Subject")
-            lesson_date = st.date_input("Lesson Date", date.today())
+
+            lesson_date = st.date_input(
+                "Lesson Date",
+                date.today()
+            )
 
             status = st.selectbox(
                 "Attendance Status",
-                ["Present", "Absent", "Late", "Excused"]
+                [
+                    "Present",
+                    "Absent",
+                    "Late",
+                    "Excused"
+                ]
             )
 
             notes = st.text_area("Notes")
@@ -463,11 +523,15 @@ def admin_dashboard():
                         "notes": notes
                     }).execute()
 
-                    st.success("Attendance saved successfully.")
+                    st.success(
+                        "Attendance saved successfully."
+                    )
 
                 except Exception as e:
 
-                    st.error(f"Could not save attendance: {e}")
+                    st.error(
+                        f"Could not save attendance: {e}"
+                    )
 
         st.divider()
 
@@ -482,13 +546,20 @@ def admin_dashboard():
             )
 
             if result.data:
-                st.dataframe(result.data, use_container_width=True)
+                st.dataframe(
+                    result.data,
+                    use_container_width=True
+                )
             else:
-                st.info("No attendance records found.")
+                st.info(
+                    "No attendance records found."
+                )
 
         except Exception as e:
 
-            st.error(f"Could not load attendance: {e}")
+            st.error(
+                f"Could not load attendance: {e}"
+            )
 
     # =====================================================
     # LESSON REPORTS
@@ -503,14 +574,21 @@ def admin_dashboard():
             student_name = st.text_input("Student")
             tutor_name = st.text_input("Tutor")
             subject = st.text_input("Subject")
+
             lesson_date = st.date_input(
                 "Lesson Date",
                 date.today()
             )
 
             topic = st.text_input("Topic")
-            lesson_summary = st.text_area("Lesson Summary")
-            homework = st.text_area("Homework")
+            lesson_summary = st.text_area(
+                "Lesson Summary"
+            )
+
+            homework = st.text_area(
+                "Homework"
+            )
+
             areas_to_improve = st.text_area(
                 "Areas to Improve"
             )
@@ -523,7 +601,9 @@ def admin_dashboard():
 
                 try:
 
-                    supabase.table("lesson_reports").insert({
+                    supabase.table(
+                        "lesson_reports"
+                    ).insert({
                         "student_name": student_name,
                         "tutor_name": tutor_name,
                         "subject": subject,
@@ -557,12 +637,17 @@ def admin_dashboard():
             )
 
             if result.data:
+
                 st.dataframe(
                     result.data,
                     use_container_width=True
                 )
+
             else:
-                st.info("No lesson reports found.")
+
+                st.info(
+                    "No lesson reports found."
+                )
 
         except Exception as e:
 
@@ -582,6 +667,7 @@ def admin_dashboard():
 
             parent_name = st.text_input("Parent")
             student_name = st.text_input("Student")
+
             amount = st.number_input(
                 "Amount",
                 min_value=0.0,
@@ -595,14 +681,20 @@ def admin_dashboard():
 
             status = st.selectbox(
                 "Payment Status",
-                ["Paid", "Pending", "Overdue"]
+                [
+                    "Paid",
+                    "Pending",
+                    "Overdue"
+                ]
             )
 
             payment_reference = st.text_input(
                 "Payment Reference"
             )
 
-            notes = st.text_area("Notes")
+            notes = st.text_area(
+                "Notes"
+            )
 
             submitted = st.form_submit_button(
                 "Save Payment"
@@ -645,12 +737,17 @@ def admin_dashboard():
             )
 
             if result.data:
+
                 st.dataframe(
                     result.data,
                     use_container_width=True
                 )
+
             else:
-                st.info("No payment records found.")
+
+                st.info(
+                    "No payment records found."
+                )
 
         except Exception as e:
 
@@ -666,36 +763,46 @@ def admin_dashboard():
 def tutor_dashboard():
 
     email = get_current_email()
+    user_id = get_current_user_id()
 
-    # Find tutor information
     try:
 
         tutor_result = (
             supabase
             .table("tutors")
             .select("*")
-            .eq("email", email)
+            .eq("user_id", user_id)
             .limit(1)
             .execute()
         )
 
     except Exception as e:
 
-        st.error(f"Could not load tutor profile: {e}")
+        st.error(
+            f"Could not load your tutor profile: {e}"
+        )
         return
 
     if not tutor_result.data:
 
         st.error(
-            "Your tutor account has not been connected to a tutor profile."
+            "Your tutor account has not been linked to a tutor profile."
         )
+
+        st.write(
+            f"Logged in as: {email}"
+        )
+
         return
 
     tutor = tutor_result.data[0]
 
-    tutor_name = tutor.get("full_name", "Tutor")
+    tutor_name = tutor.get(
+        "full_name",
+        "Tutor"
+    )
 
-    st.title(f"👩‍🏫 Tutor Portal")
+    st.title("👩‍🏫 Tutor Portal")
 
     st.success(
         f"Welcome, {tutor_name}."
@@ -725,11 +832,13 @@ def tutor_dashboard():
 
         st.header("🏠 My Dashboard")
 
-        st.write(
+        col1, col2 = st.columns(2)
+
+        col1.write(
             f"**Tutor:** {tutor_name}"
         )
 
-        st.write(
+        col2.write(
             f"**Email:** {email}"
         )
 
@@ -789,7 +898,7 @@ def tutor_dashboard():
         except Exception as e:
 
             st.error(
-                f"Could not load tutor dashboard: {e}"
+                f"Could not load dashboard: {e}"
             )
 
     # =====================================================
@@ -810,7 +919,17 @@ def tutor_dashboard():
                 .execute()
             )
 
-            if not timetable_result.data:
+            student_names = sorted(
+                list(
+                    set(
+                        row["student_name"]
+                        for row in timetable_result.data
+                        if row.get("student_name")
+                    )
+                )
+            )
+
+            if not student_names:
 
                 st.info(
                     "You currently have no students assigned."
@@ -818,61 +937,37 @@ def tutor_dashboard():
 
             else:
 
-                student_names = sorted(
-                    list(
-                        set(
-                            row["student_name"]
-                            for row in timetable_result.data
-                            if row.get("student_name")
-                        )
-                    )
-                )
-
                 for student_name in student_names:
 
                     st.subheader(
                         f"👤 {student_name}"
                     )
 
-                    try:
+                    student_result = (
+                        supabase
+                        .table("Student")
+                        .select("*")
+                        .eq("full_name", student_name)
+                        .limit(1)
+                        .execute()
+                    )
 
-                        student_result = (
-                            supabase
-                            .table("Student")
-                            .select("*")
-                            .eq("full_name", student_name)
-                            .limit(1)
-                            .execute()
+                    if student_result.data:
+
+                        student = student_result.data[0]
+
+                        col1, col2 = st.columns(2)
+
+                        col1.write(
+                            f"**Year / Grade:** {student.get('year_grade', '')}"
                         )
 
-                        if student_result.data:
+                        col2.write(
+                            f"**School:** {student.get('school', '')}"
+                        )
 
-                            student = student_result.data[0]
-
-                            col1, col2 = st.columns(2)
-
-                            col1.write(
-                                f"**Year / Grade:** {student.get('year_grade', '')}"
-                            )
-
-                            col2.write(
-                                f"**School:** {student.get('school', '')}"
-                            )
-
-                            st.write(
-                                f"**Subjects:** {student.get('subjects', '')}"
-                            )
-
-                        else:
-
-                            st.info(
-                                "Student profile details not found."
-                            )
-
-                    except Exception as e:
-
-                        st.error(
-                            f"Could not load student details: {e}"
+                        st.write(
+                            f"**Subjects:** {student.get('subjects', '')}"
                         )
 
                     st.divider()
@@ -922,7 +1017,7 @@ def tutor_dashboard():
             )
 
     # =====================================================
-    # TUTOR ATTENDANCE
+    # ATTENDANCE
     # =====================================================
 
     elif menu == "Attendance":
@@ -939,32 +1034,25 @@ def tutor_dashboard():
                 .execute()
             )
 
-            if timetable_result.data:
-
-                student_options = sorted(
-                    list(
-                        set(
-                            row["student_name"]
-                            for row in timetable_result.data
-                            if row.get("student_name")
-                        )
+            student_options = sorted(
+                list(
+                    set(
+                        row["student_name"]
+                        for row in timetable_result.data
+                        if row.get("student_name")
                     )
                 )
+            )
 
-                subject_options = sorted(
-                    list(
-                        set(
-                            row["subject"]
-                            for row in timetable_result.data
-                            if row.get("subject")
-                        )
+            subject_options = sorted(
+                list(
+                    set(
+                        row["subject"]
+                        for row in timetable_result.data
+                        if row.get("subject")
                     )
                 )
-
-            else:
-
-                student_options = []
-                subject_options = []
+            )
 
         except:
 
@@ -989,8 +1077,6 @@ def tutor_dashboard():
                 subject = st.selectbox(
                     "Subject",
                     subject_options
-                    if subject_options
-                    else ["English"]
                 )
 
                 lesson_date = st.date_input(
@@ -1020,7 +1106,9 @@ def tutor_dashboard():
 
                     try:
 
-                        supabase.table("attendance").insert({
+                        supabase.table(
+                            "attendance"
+                        ).insert({
                             "student_name": student_name,
                             "tutor_name": tutor_name,
                             "subject": subject,
@@ -1039,42 +1127,8 @@ def tutor_dashboard():
                             f"Could not save attendance: {e}"
                         )
 
-        st.divider()
-
-        st.subheader("My Attendance Records")
-
-        try:
-
-            result = (
-                supabase
-                .table("attendance")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .order("lesson_date", desc=True)
-                .execute()
-            )
-
-            if result.data:
-
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-
-            else:
-
-                st.info(
-                    "No attendance records yet."
-                )
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load attendance: {e}"
-            )
-
     # =====================================================
-    # TUTOR LESSON REPORTS
+    # LESSON REPORTS
     # =====================================================
 
     elif menu == "Lesson Reports":
@@ -1091,32 +1145,25 @@ def tutor_dashboard():
                 .execute()
             )
 
-            if timetable_result.data:
-
-                student_options = sorted(
-                    list(
-                        set(
-                            row["student_name"]
-                            for row in timetable_result.data
-                            if row.get("student_name")
-                        )
+            student_options = sorted(
+                list(
+                    set(
+                        row["student_name"]
+                        for row in timetable_result.data
+                        if row.get("student_name")
                     )
                 )
+            )
 
-                subject_options = sorted(
-                    list(
-                        set(
-                            row["subject"]
-                            for row in timetable_result.data
-                            if row.get("subject")
-                        )
+            subject_options = sorted(
+                list(
+                    set(
+                        row["subject"]
+                        for row in timetable_result.data
+                        if row.get("subject")
                     )
                 )
-
-            else:
-
-                student_options = []
-                subject_options = []
+            )
 
         except:
 
@@ -1141,8 +1188,6 @@ def tutor_dashboard():
                 subject = st.selectbox(
                     "Subject",
                     subject_options
-                    if subject_options
-                    else ["English"]
                 )
 
                 lesson_date = st.date_input(
@@ -1197,43 +1242,9 @@ def tutor_dashboard():
                             f"Could not save lesson report: {e}"
                         )
 
-        st.divider()
-
-        st.subheader("My Previous Lesson Reports")
-
-        try:
-
-            result = (
-                supabase
-                .table("lesson_reports")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .order("lesson_date", desc=True)
-                .execute()
-            )
-
-            if result.data:
-
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-
-            else:
-
-                st.info(
-                    "No lesson reports yet."
-                )
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load lesson reports: {e}"
-            )
-
 
 # =========================================================
-# MAIN APPLICATION
+# START APPLICATION
 # =========================================================
 
 if st.session_state.user is None:
