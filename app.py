@@ -52,9 +52,6 @@ if st.session_state.user is None:
                 })
 
                 st.session_state.user = response.user
-
-                st.success("Login successful.")
-
                 st.rerun()
 
             except Exception:
@@ -90,9 +87,7 @@ st.sidebar.write(
 if st.sidebar.button("Logout"):
 
     supabase.auth.sign_out()
-
     st.session_state.user = None
-
     st.rerun()
 
 
@@ -128,28 +123,24 @@ if page == "Dashboard":
     try:
         students = supabase.table("Student").select("*").execute()
         student_count = len(students.data)
-
     except Exception:
         student_count = 0
 
     try:
         tutors = supabase.table("tutors").select("*").execute()
         tutor_count = len(tutors.data)
-
     except Exception:
         tutor_count = 0
 
     try:
         parents = supabase.table("parents").select("*").execute()
         parent_count = len(parents.data)
-
     except Exception:
         parent_count = 0
 
     try:
         timetable = supabase.table("timetable").select("*").execute()
         class_count = len(timetable.data)
-
     except Exception:
         class_count = 0
 
@@ -329,6 +320,7 @@ elif page == "Timetable":
         student = st.text_input("Student Name")
         tutor = st.text_input("Tutor Name")
         subject = st.text_input("Subject")
+
         day = st.selectbox(
             "Day",
             [
@@ -347,7 +339,12 @@ elif page == "Timetable":
 
         status = st.selectbox(
             "Status",
-            ["Active", "Paused", "Completed", "Cancelled"]
+            [
+                "Active",
+                "Paused",
+                "Completed",
+                "Cancelled"
+            ]
         )
 
         submitted = st.form_submit_button(
@@ -533,6 +530,7 @@ elif page == "Payments":
 
         parent = st.text_input("Parent Name")
         student = st.text_input("Student Name")
+
         amount = st.number_input(
             "Amount",
             min_value=0.0,
