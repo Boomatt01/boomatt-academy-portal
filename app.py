@@ -8,7 +8,6 @@ st.set_page_config(
 )
 
 st.success("Supabase connection loaded successfully.")
-)
 
 # -----------------------------
 # HEADER
@@ -98,9 +97,31 @@ elif page == "Students":
         if submitted:
 
             if name:
-                st.success(f"{name} has been added.")
+
+                try:
+
+                    response = supabase.table("Student").insert({
+                        "full_name": name,
+                        "year_grade": year,
+                        "school": school,
+                        "subjects": subjects
+                    }).execute()
+
+                    st.success(
+                        f"{name} has been added successfully."
+                    )
+
+                except Exception as e:
+
+                    st.error(
+                        f"Could not add student: {e}"
+                    )
+
             else:
-                st.warning("Please enter the student's name.")
+
+                st.warning(
+                    "Please enter the student's name."
+                )
 
 
 # -----------------------------
@@ -124,9 +145,16 @@ elif page == "Tutors":
         if submitted:
 
             if name:
-                st.success(f"{name} has been added.")
+
+                st.success(
+                    f"{name} has been added."
+                )
+
             else:
-                st.warning("Please enter the tutor's name.")
+
+                st.warning(
+                    "Please enter the tutor's name."
+                )
 
 
 # -----------------------------
@@ -137,21 +165,37 @@ elif page == "Parents":
 
     st.header("👨‍👩‍👧 Parents")
 
-    st.write("Manage parent accounts and student relationships.")
+    st.write(
+        "Manage parent accounts and student relationships."
+    )
 
     with st.form("parent_form"):
 
-        name = st.text_input("Parent / Guardian Name")
-        email = st.text_input("Email Address")
+        name = st.text_input(
+            "Parent / Guardian Name"
+        )
 
-        submitted = st.form_submit_button("Add Parent")
+        email = st.text_input(
+            "Email Address"
+        )
+
+        submitted = st.form_submit_button(
+            "Add Parent"
+        )
 
         if submitted:
 
             if name:
-                st.success(f"{name} has been added.")
+
+                st.success(
+                    f"{name} has been added."
+                )
+
             else:
-                st.warning("Please enter the parent's name.")
+
+                st.warning(
+                    "Please enter the parent's name."
+                )
 
 
 # -----------------------------
@@ -162,7 +206,9 @@ elif page == "Timetable":
 
     st.header("📅 Timetable")
 
-    st.write("Manage lessons and tutor schedules.")
+    st.write(
+        "Manage lessons and tutor schedules."
+    )
 
     st.info(
         "The timetable system will allow you to assign "
@@ -178,7 +224,9 @@ elif page == "Attendance":
 
     st.header("✅ Attendance")
 
-    st.write("Monitor lesson attendance.")
+    st.write(
+        "Monitor lesson attendance."
+    )
 
     st.info(
         "Tutors will eventually be able to mark students "
@@ -194,7 +242,9 @@ elif page == "Lesson Reports":
 
     st.header("📝 Lesson Reports")
 
-    st.write("View tutor lesson reports and student feedback.")
+    st.write(
+        "View tutor lesson reports and student feedback."
+    )
 
     st.info(
         "Tutors will submit lesson summaries, topics covered, "
@@ -210,7 +260,9 @@ elif page == "Payments":
 
     st.header("💰 Payments")
 
-    st.write("Monitor academy payments.")
+    st.write(
+        "Monitor academy payments."
+    )
 
     st.info(
         "The payment section will eventually track invoices, "
