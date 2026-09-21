@@ -1,121 +1,97 @@
 import streamlit as st
 from supabase_client import supabase
-from datetime import date
 
 st.set_page_config(
-    page_title="Boomatt Academy Portal",
+    page_title="Boomatt Academy",
     page_icon="📚",
     layout="wide"
 )
 
-# =========================================================
-# SESSION
-# =========================================================
 
-if "user" not in st.session_state:
-    st.session_state.user = None
-
-
-# =========================================================
+# =========================
 # LOGIN
-# =========================================================
+# =========================
 
-def login_page():
-
+def login():
     st.title("📚 Boomatt Academy")
     st.subheader("Building Confident Learners, One Lesson at a Time")
 
-    st.write("Please sign in to access your portal.")
+    st.markdown("### Portal Login")
 
-    with st.form("login_form"):
+    email = st.text_input("Email address")
+    password = st.text_input("Password", type="password")
 
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
+    if st.button("Login", use_container_width=True):
+        if not email or not password:
+            st.error("Please enter your email and password.")
+            return
 
-        submitted = st.form_submit_button("Sign In")
+        try:
+            response = supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": password
+            })
 
-        if submitted:
-
-            if not email or not password:
-                st.error("Please enter your email and password.")
-                return
-
-            try:
-
-                response = supabase.auth.sign_in_with_password({
-                    "email": email,
-                    "password": password
-                })
-
+            if response.user:
                 st.session_state.user = response.user
-
                 st.success("Login successful.")
                 st.rerun()
 
-            except Exception as e:
+        except Exception as e:
+            st.error(f"Login failed: {e}")
 
-                st.error(f"Login failed: {e}")
 
-
-# =========================================================
+# =========================
 # LOGOUT
-# =========================================================
+# =========================
 
 def logout():
-
     try:
         supabase.auth.sign_out()
-    except:
+    except Exception:
         pass
 
-    st.session_state.user = None
+    st.session_state.clear()
     st.rerun()
 
 
-# =========================================================
-# CURRENT USER
-# =========================================================
+# =========================
+# GET EMAIL
+# =========================
 
 def get_current_email():
+    if "user" not in st.session_state:
+        return None
 
-    if st.session_state.user:
-        return st.session_state.user.email
+    user = st.session_state.user
 
-    return None
-
-
-def get_current_user_id():
-
-    if st.session_state.user:
-        return st.session_state.user.id
-
-    return None
+    return user.email
 
 
-# =========================================================
-# ROLE DETECTION
-# =========================================================
+# =========================
+# DETERMINE ROLE
+# =========================
 
 def get_user_role():
 
     email = get_current_email()
-    user_id = get_current_user_id()
 
-    if not email or not user_id:
+    if not email:
         return None
 
+    email = email.lower().strip()
+
     # Academy Director
-    if email.lower() == "boomattolatunji@gmail.com":
+    if email == "boomattolatunji@gmail.com":
         return "admin"
 
-    # Check tutor by Supabase Auth User ID
+    # Check tutors table using email
     try:
-
         result = (
             supabase
             .table("tutors")
             .select("*")
-            .eq("user_id", user_id)
+            .eq("email", email)
             .limit(1)
             .execute()
         )
@@ -124,31 +100,22 @@ def get_user_role():
             return "tutor"
 
     except Exception as e:
-
-        st.error(f"Could not determine your portal role: {e}")
+        st.error(f"Could not determine your role: {e}")
         return None
 
     return "unknown"
 
 
-# =========================================================
+# =========================
 # ADMIN PORTAL
-# =========================================================
+# =========================
 
-def admin_dashboard():
+def admin_portal():
 
-    st.title("🏫 Boomatt Academy — Admin Portal")
+    st.sidebar.title("📚 Boomatt Academy")
+    st.sidebar.caption("Academy Administrator")
 
-    st.success(
-        f"You are logged in as Academy Administrator: {get_current_email()}"
-    )
-
-    if st.button("Logout"):
-        logout()
-
-    st.divider()
-
-    menu = st.sidebar.radio(
+    page = st.sidebar.radio(
         "Admin Menu",
         [
             "Dashboard",
@@ -162,171 +129,122 @@ def admin_dashboard():
         ]
     )
 
-    # =====================================================
+    if st.sidebar.button("Logout"):
+        logout()
+
+    # -------------------------
     # DASHBOARD
-    # =====================================================
+    # -------------------------
 
-    if menu == "Dashboard":
+    if page == "Dashboard":
 
-        st.header("📊 Dashboard")
+        st.title("📊 Admin Dashboard")
+
+        st.success(
+            "You are logged in as Academy Administrator."
+        )
+
+        col1, col2, col3, col4 = st.columns(4)
 
         try:
-
             students = supabase.table("Student").select("id").execute()
             tutors = supabase.table("tutors").select("id").execute()
             parents = supabase.table("parents").select("id").execute()
             timetable = supabase.table("timetable").select("id").execute()
 
-            col1, col2, col3, col4 = st.columns(4)
-
-            col1.metric("Students", len(students.data))
-            col2.metric("Tutors", len(tutors.data))
-            col3.metric("Parents", len(parents.data))
-            col4.metric("Timetable Entries", len(timetable.data))
+            col1.metric("Students", len(students.data or []))
+            col2.metric("Tutors", len(tutors.data or []))
+            col3.metric("Parents", len(parents.data or []))
+            col4.metric("Timetable Entries", len(timetable.data or []))
 
         except Exception as e:
-
             st.error(f"Could not load dashboard: {e}")
 
-    # =====================================================
+    # -------------------------
     # STUDENTS
-    # =====================================================
+    # -------------------------
 
-    elif menu == "Students":
+    elif page == "Students":
 
-        st.header("👨‍🎓 Students")
+        st.title("👨‍🎓 Students")
 
         with st.form("student_form"):
 
-            name = st.text_input("Full Name")
+            full_name = st.text_input("Student Name")
             year_grade = st.text_input("Year / Grade")
             school = st.text_input("School")
             subjects = st.text_input("Subjects")
 
-            submitted = st.form_submit_button("Add Student")
+            submitted = st.form_submit_button(
+                "Add Student"
+            )
 
             if submitted:
 
                 try:
 
                     supabase.table("Student").insert({
-                        "full_name": name,
+                        "full_name": full_name,
                         "year_grade": year_grade,
                         "school": school,
                         "subjects": subjects
                     }).execute()
 
                     st.success(
-                        f"{name} has been added successfully."
+                        f"{full_name} has been added successfully."
                     )
 
                 except Exception as e:
+                    st.error(f"Could not add student: {e}")
 
-                    st.error(
-                        f"Could not add student: {e}"
-                    )
-
-        st.divider()
-
-        try:
-
-            result = (
-                supabase
-                .table("Student")
-                .select("*")
-                .order("created_at", desc=True)
-                .execute()
-            )
-
-            if result.data:
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-            else:
-                st.info("No students found.")
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load students: {e}"
-            )
-
-    # =====================================================
+    # -------------------------
     # TUTORS
-    # =====================================================
+    # -------------------------
 
-    elif menu == "Tutors":
+    elif page == "Tutors":
 
-        st.header("👩‍🏫 Tutors")
+        st.title("👨‍🏫 Tutors")
 
         with st.form("tutor_form"):
 
-            name = st.text_input("Full Name")
-            email = st.text_input("Email")
+            full_name = st.text_input("Tutor Name")
+            email = st.text_input("Tutor Email")
             subjects = st.text_input("Subjects")
             qualification = st.text_input("Qualification")
 
-            submitted = st.form_submit_button("Add Tutor")
+            submitted = st.form_submit_button(
+                "Add Tutor"
+            )
 
             if submitted:
 
                 try:
 
                     supabase.table("tutors").insert({
-                        "full_name": name,
-                        "email": email,
+                        "full_name": full_name,
+                        "email": email.lower().strip(),
                         "subjects": subjects,
                         "qualification": qualification
                     }).execute()
 
                     st.success(
-                        f"{name} has been added successfully."
+                        f"{full_name} has been added successfully."
                     )
 
                 except Exception as e:
+                    st.error(f"Could not add tutor: {e}")
 
-                    st.error(
-                        f"Could not add tutor: {e}"
-                    )
-
-        st.divider()
-
-        try:
-
-            result = (
-                supabase
-                .table("tutors")
-                .select("*")
-                .order("created_at", desc=True)
-                .execute()
-            )
-
-            if result.data:
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-            else:
-                st.info("No tutors found.")
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load tutors: {e}"
-            )
-
-    # =====================================================
+    # -------------------------
     # PARENTS
-    # =====================================================
+    # -------------------------
 
-    elif menu == "Parents":
+    elif page == "Parents":
 
-        st.header("👨‍👩‍👧 Parents")
+        st.title("👨‍👩‍👧 Parents")
 
         with st.form("parent_form"):
 
-            name = st.text_input("Full Name")
+            full_name = st.text_input("Parent Name")
             email = st.text_input("Email")
             phone = st.text_input("Phone")
 
@@ -339,61 +257,31 @@ def admin_dashboard():
                 try:
 
                     supabase.table("parents").insert({
-                        "full_name": name,
+                        "full_name": full_name,
                         "email": email,
                         "phone": phone
                     }).execute()
 
                     st.success(
-                        f"{name} has been added successfully."
+                        f"{full_name} has been added successfully."
                     )
 
                 except Exception as e:
+                    st.error(f"Could not add parent: {e}")
 
-                    st.error(
-                        f"Could not add parent: {e}"
-                    )
-
-        st.divider()
-
-        try:
-
-            result = (
-                supabase
-                .table("parents")
-                .select("*")
-                .order("created_at", desc=True)
-                .execute()
-            )
-
-            if result.data:
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-            else:
-                st.info("No parents found.")
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load parents: {e}"
-            )
-
-    # =====================================================
+    # -------------------------
     # TIMETABLE
-    # =====================================================
+    # -------------------------
 
-    elif menu == "Timetable":
+    elif page == "Timetable":
 
-        st.header("📅 Timetable")
+        st.title("📅 Timetable")
 
         with st.form("timetable_form"):
 
-            student_name = st.text_input("Student")
-            tutor_name = st.text_input("Tutor")
+            student_name = st.text_input("Student Name")
+            tutor_name = st.text_input("Tutor Name")
             subject = st.text_input("Subject")
-
             day = st.selectbox(
                 "Day",
                 [
@@ -410,15 +298,6 @@ def admin_dashboard():
             start_time = st.text_input("Start Time")
             end_time = st.text_input("End Time")
 
-            status = st.selectbox(
-                "Status",
-                [
-                    "Scheduled",
-                    "Completed",
-                    "Cancelled"
-                ]
-            )
-
             submitted = st.form_submit_button(
                 "Add Timetable Entry"
             )
@@ -434,7 +313,7 @@ def admin_dashboard():
                         "day": day,
                         "start_time": start_time,
                         "end_time": end_time,
-                        "status": status
+                        "status": "Scheduled"
                     }).execute()
 
                     st.success(
@@ -442,12 +321,257 @@ def admin_dashboard():
                     )
 
                 except Exception as e:
-
                     st.error(
                         f"Could not add timetable entry: {e}"
                     )
 
-        st.divider()
+    # -------------------------
+    # ATTENDANCE
+    # -------------------------
+
+    elif page == "Attendance":
+
+        st.title("📝 Attendance")
+
+        with st.form("attendance_form"):
+
+            student_name = st.text_input("Student Name")
+            tutor_name = st.text_input("Tutor Name")
+            subject = st.text_input("Subject")
+            lesson_date = st.date_input("Lesson Date")
+
+            status = st.selectbox(
+                "Attendance",
+                [
+                    "Present",
+                    "Absent",
+                    "Late"
+                ]
+            )
+
+            notes = st.text_area("Notes")
+
+            submitted = st.form_submit_button(
+                "Save Attendance"
+            )
+
+            if submitted:
+
+                try:
+
+                    supabase.table("attendance").insert({
+                        "student_name": student_name,
+                        "tutor_name": tutor_name,
+                        "subject": subject,
+                        "lesson_date": str(lesson_date),
+                        "status": status,
+                        "notes": notes
+                    }).execute()
+
+                    st.success(
+                        "Attendance saved successfully."
+                    )
+
+                except Exception as e:
+                    st.error(
+                        f"Could not save attendance: {e}"
+                    )
+
+    # -------------------------
+    # LESSON REPORTS
+    # -------------------------
+
+    elif page == "Lesson Reports":
+
+        st.title("📖 Lesson Reports")
+
+        with st.form("lesson_report_form"):
+
+            student_name = st.text_input("Student Name")
+            tutor_name = st.text_input("Tutor Name")
+            subject = st.text_input("Subject")
+            lesson_date = st.date_input("Lesson Date")
+            topic = st.text_input("Topic")
+            lesson_summary = st.text_area("Lesson Summary")
+            homework = st.text_area("Homework")
+            areas_to_improve = st.text_area(
+                "Areas to Improve"
+            )
+
+            submitted = st.form_submit_button(
+                "Save Lesson Report"
+            )
+
+            if submitted:
+
+                try:
+
+                    supabase.table("lesson_reports").insert({
+                        "student_name": student_name,
+                        "tutor_name": tutor_name,
+                        "subject": subject,
+                        "lesson_date": str(lesson_date),
+                        "topic": topic,
+                        "lesson_summary": lesson_summary,
+                        "homework": homework,
+                        "areas_to_improve": areas_to_improve
+                    }).execute()
+
+                    st.success(
+                        "Lesson report saved successfully."
+                    )
+
+                except Exception as e:
+                    st.error(
+                        f"Could not save lesson report: {e}"
+                    )
+
+    # -------------------------
+    # PAYMENTS
+    # -------------------------
+
+    elif page == "Payments":
+
+        st.title("💳 Payments")
+
+        with st.form("payment_form"):
+
+            parent_name = st.text_input("Parent Name")
+            student_name = st.text_input("Student Name")
+            amount = st.number_input(
+                "Amount",
+                min_value=0.0,
+                step=100.0
+            )
+
+            payment_date = st.date_input(
+                "Payment Date"
+            )
+
+            status = st.selectbox(
+                "Payment Status",
+                [
+                    "Paid",
+                    "Pending",
+                    "Overdue"
+                ]
+            )
+
+            payment_reference = st.text_input(
+                "Payment Reference"
+            )
+
+            notes = st.text_area("Notes")
+
+            submitted = st.form_submit_button(
+                "Save Payment"
+            )
+
+            if submitted:
+
+                try:
+
+                    supabase.table("payments").insert({
+                        "parent_name": parent_name,
+                        "student_name": student_name,
+                        "amount": amount,
+                        "payment_date": str(payment_date),
+                        "status": status,
+                        "payment_reference": payment_reference,
+                        "notes": notes
+                    }).execute()
+
+                    st.success(
+                        "Payment saved successfully."
+                    )
+
+                except Exception as e:
+                    st.error(
+                        f"Could not save payment: {e}"
+                    )
+
+
+# =========================
+# TUTOR PORTAL
+# =========================
+
+def tutor_portal():
+
+    email = get_current_email()
+
+    st.sidebar.title("📚 Boomatt Academy")
+    st.sidebar.caption("Tutor Portal")
+
+    if st.sidebar.button("Logout"):
+        logout()
+
+    try:
+
+        tutor_result = (
+            supabase
+            .table("tutors")
+            .select("*")
+            .eq("email", email.lower().strip())
+            .limit(1)
+            .execute()
+        )
+
+        if not tutor_result.data:
+
+            st.error(
+                "Your tutor profile could not be found."
+            )
+            return
+
+        tutor = tutor_result.data[0]
+
+        tutor_name = tutor.get("full_name", "")
+
+    except Exception as e:
+
+        st.error(
+            f"Could not load tutor profile: {e}"
+        )
+        return
+
+    menu = st.sidebar.radio(
+        "Tutor Menu",
+        [
+            "Dashboard",
+            "My Students",
+            "My Timetable",
+            "Attendance",
+            "Lesson Reports"
+        ]
+    )
+
+    # -------------------------
+    # TUTOR DASHBOARD
+    # -------------------------
+
+    if menu == "Dashboard":
+
+        st.title("👨‍🏫 Tutor Dashboard")
+
+        st.success(
+            f"Welcome, {tutor_name}."
+        )
+
+        st.write(
+            "You are logged in to the Boomatt Academy Tutor Portal."
+        )
+
+        st.info(
+            f"Registered email: {email}"
+        )
+
+    # -------------------------
+    # MY STUDENTS
+    # -------------------------
+
+    elif menu == "My Students":
+
+        st.title("👨‍🎓 My Students")
 
         try:
 
@@ -455,7 +579,51 @@ def admin_dashboard():
                 supabase
                 .table("timetable")
                 .select("*")
-                .order("created_at", desc=True)
+                .eq("tutor_name", tutor_name)
+                .execute()
+            )
+
+            if result.data:
+
+                students = []
+
+                for item in result.data:
+
+                    if item.get("student_name") not in students:
+                        students.append(
+                            item.get("student_name")
+                        )
+
+                for student in students:
+                    st.write(f"• {student}")
+
+            else:
+
+                st.info(
+                    "No students have been assigned to you yet."
+                )
+
+        except Exception as e:
+
+            st.error(
+                f"Could not load students: {e}"
+            )
+
+    # -------------------------
+    # MY TIMETABLE
+    # -------------------------
+
+    elif menu == "My Timetable":
+
+        st.title("📅 My Timetable")
+
+        try:
+
+            result = (
+                supabase
+                .table("timetable")
+                .select("*")
+                .eq("tutor_name", tutor_name)
                 .execute()
             )
 
@@ -466,7 +634,7 @@ def admin_dashboard():
                 )
             else:
                 st.info(
-                    "No timetable entries found."
+                    "No timetable entries assigned to you."
                 )
 
         except Exception as e:
@@ -475,39 +643,43 @@ def admin_dashboard():
                 f"Could not load timetable: {e}"
             )
 
-    # =====================================================
+    # -------------------------
     # ATTENDANCE
-    # =====================================================
+    # -------------------------
 
     elif menu == "Attendance":
 
-        st.header("✅ Attendance")
+        st.title("📝 Attendance")
 
-        with st.form("attendance_form"):
+        with st.form("tutor_attendance_form"):
 
-            student_name = st.text_input("Student")
-            tutor_name = st.text_input("Tutor")
-            subject = st.text_input("Subject")
+            student_name = st.text_input(
+                "Student Name"
+            )
+
+            subject = st.text_input(
+                "Subject"
+            )
 
             lesson_date = st.date_input(
-                "Lesson Date",
-                date.today()
+                "Lesson Date"
             )
 
             status = st.selectbox(
-                "Attendance Status",
+                "Attendance",
                 [
                     "Present",
                     "Absent",
-                    "Late",
-                    "Excused"
+                    "Late"
                 ]
             )
 
-            notes = st.text_area("Notes")
+            notes = st.text_area(
+                "Notes"
+            )
 
             submitted = st.form_submit_button(
-                "Add Attendance"
+                "Save Attendance"
             )
 
             if submitted:
@@ -533,54 +705,32 @@ def admin_dashboard():
                         f"Could not save attendance: {e}"
                     )
 
-        st.divider()
-
-        try:
-
-            result = (
-                supabase
-                .table("attendance")
-                .select("*")
-                .order("lesson_date", desc=True)
-                .execute()
-            )
-
-            if result.data:
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-            else:
-                st.info(
-                    "No attendance records found."
-                )
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load attendance: {e}"
-            )
-
-    # =====================================================
+    # -------------------------
     # LESSON REPORTS
-    # =====================================================
+    # -------------------------
 
     elif menu == "Lesson Reports":
 
-        st.header("📝 Lesson Reports")
+        st.title("📖 Lesson Reports")
 
-        with st.form("lesson_report_form"):
+        with st.form("tutor_report_form"):
 
-            student_name = st.text_input("Student")
-            tutor_name = st.text_input("Tutor")
-            subject = st.text_input("Subject")
-
-            lesson_date = st.date_input(
-                "Lesson Date",
-                date.today()
+            student_name = st.text_input(
+                "Student Name"
             )
 
-            topic = st.text_input("Topic")
+            subject = st.text_input(
+                "Subject"
+            )
+
+            lesson_date = st.date_input(
+                "Lesson Date"
+            )
+
+            topic = st.text_input(
+                "Topic"
+            )
+
             lesson_summary = st.text_area(
                 "Lesson Summary"
             )
@@ -594,16 +744,14 @@ def admin_dashboard():
             )
 
             submitted = st.form_submit_button(
-                "Save Lesson Report"
+                "Submit Lesson Report"
             )
 
             if submitted:
 
                 try:
 
-                    supabase.table(
-                        "lesson_reports"
-                    ).insert({
+                    supabase.table("lesson_reports").insert({
                         "student_name": student_name,
                         "tutor_name": tutor_name,
                         "subject": subject,
@@ -615,641 +763,23 @@ def admin_dashboard():
                     }).execute()
 
                     st.success(
-                        "Lesson report saved successfully."
+                        "Lesson report submitted successfully."
                     )
 
                 except Exception as e:
 
                     st.error(
-                        f"Could not save lesson report: {e}"
+                        f"Could not submit lesson report: {e}"
                     )
 
-        st.divider()
 
-        try:
+# =========================
+# MAIN
+# =========================
 
-            result = (
-                supabase
-                .table("lesson_reports")
-                .select("*")
-                .order("lesson_date", desc=True)
-                .execute()
-            )
+if "user" not in st.session_state:
 
-            if result.data:
-
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-
-            else:
-
-                st.info(
-                    "No lesson reports found."
-                )
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load lesson reports: {e}"
-            )
-
-    # =====================================================
-    # PAYMENTS
-    # =====================================================
-
-    elif menu == "Payments":
-
-        st.header("💳 Payments")
-
-        with st.form("payment_form"):
-
-            parent_name = st.text_input("Parent")
-            student_name = st.text_input("Student")
-
-            amount = st.number_input(
-                "Amount",
-                min_value=0.0,
-                step=500.0
-            )
-
-            payment_date = st.date_input(
-                "Payment Date",
-                date.today()
-            )
-
-            status = st.selectbox(
-                "Payment Status",
-                [
-                    "Paid",
-                    "Pending",
-                    "Overdue"
-                ]
-            )
-
-            payment_reference = st.text_input(
-                "Payment Reference"
-            )
-
-            notes = st.text_area(
-                "Notes"
-            )
-
-            submitted = st.form_submit_button(
-                "Save Payment"
-            )
-
-            if submitted:
-
-                try:
-
-                    supabase.table("payments").insert({
-                        "parent_name": parent_name,
-                        "student_name": student_name,
-                        "amount": amount,
-                        "payment_date": str(payment_date),
-                        "status": status,
-                        "payment_reference": payment_reference,
-                        "notes": notes
-                    }).execute()
-
-                    st.success(
-                        "Payment saved successfully."
-                    )
-
-                except Exception as e:
-
-                    st.error(
-                        f"Could not save payment: {e}"
-                    )
-
-        st.divider()
-
-        try:
-
-            result = (
-                supabase
-                .table("payments")
-                .select("*")
-                .order("payment_date", desc=True)
-                .execute()
-            )
-
-            if result.data:
-
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-
-            else:
-
-                st.info(
-                    "No payment records found."
-                )
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load payments: {e}"
-            )
-
-
-# =========================================================
-# TUTOR PORTAL
-# =========================================================
-
-def tutor_dashboard():
-
-    email = get_current_email()
-    user_id = get_current_user_id()
-
-    try:
-
-        tutor_result = (
-            supabase
-            .table("tutors")
-            .select("*")
-            .eq("user_id", user_id)
-            .limit(1)
-            .execute()
-        )
-
-    except Exception as e:
-
-        st.error(
-            f"Could not load your tutor profile: {e}"
-        )
-        return
-
-    if not tutor_result.data:
-
-        st.error(
-            "Your tutor account has not been linked to a tutor profile."
-        )
-
-        st.write(
-            f"Logged in as: {email}"
-        )
-
-        return
-
-    tutor = tutor_result.data[0]
-
-    tutor_name = tutor.get(
-        "full_name",
-        "Tutor"
-    )
-
-    st.title("👩‍🏫 Tutor Portal")
-
-    st.success(
-        f"Welcome, {tutor_name}."
-    )
-
-    if st.button("Logout"):
-        logout()
-
-    st.divider()
-
-    menu = st.sidebar.radio(
-        "Tutor Menu",
-        [
-            "Dashboard",
-            "My Students",
-            "My Timetable",
-            "Attendance",
-            "Lesson Reports"
-        ]
-    )
-
-    # =====================================================
-    # TUTOR DASHBOARD
-    # =====================================================
-
-    if menu == "Dashboard":
-
-        st.header("🏠 My Dashboard")
-
-        col1, col2 = st.columns(2)
-
-        col1.write(
-            f"**Tutor:** {tutor_name}"
-        )
-
-        col2.write(
-            f"**Email:** {email}"
-        )
-
-        st.write(
-            f"**Subjects:** {tutor.get('subjects', '')}"
-        )
-
-        st.write(
-            f"**Qualification:** {tutor.get('qualification', '')}"
-        )
-
-        st.divider()
-
-        try:
-
-            timetable_result = (
-                supabase
-                .table("timetable")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .execute()
-            )
-
-            attendance_result = (
-                supabase
-                .table("attendance")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .execute()
-            )
-
-            reports_result = (
-                supabase
-                .table("lesson_reports")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .execute()
-            )
-
-            col1, col2, col3 = st.columns(3)
-
-            col1.metric(
-                "My Lessons",
-                len(timetable_result.data)
-            )
-
-            col2.metric(
-                "Attendance Records",
-                len(attendance_result.data)
-            )
-
-            col3.metric(
-                "Lesson Reports",
-                len(reports_result.data)
-            )
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load dashboard: {e}"
-            )
-
-    # =====================================================
-    # MY STUDENTS
-    # =====================================================
-
-    elif menu == "My Students":
-
-        st.header("👨‍🎓 My Students")
-
-        try:
-
-            timetable_result = (
-                supabase
-                .table("timetable")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .execute()
-            )
-
-            student_names = sorted(
-                list(
-                    set(
-                        row["student_name"]
-                        for row in timetable_result.data
-                        if row.get("student_name")
-                    )
-                )
-            )
-
-            if not student_names:
-
-                st.info(
-                    "You currently have no students assigned."
-                )
-
-            else:
-
-                for student_name in student_names:
-
-                    st.subheader(
-                        f"👤 {student_name}"
-                    )
-
-                    student_result = (
-                        supabase
-                        .table("Student")
-                        .select("*")
-                        .eq("full_name", student_name)
-                        .limit(1)
-                        .execute()
-                    )
-
-                    if student_result.data:
-
-                        student = student_result.data[0]
-
-                        col1, col2 = st.columns(2)
-
-                        col1.write(
-                            f"**Year / Grade:** {student.get('year_grade', '')}"
-                        )
-
-                        col2.write(
-                            f"**School:** {student.get('school', '')}"
-                        )
-
-                        st.write(
-                            f"**Subjects:** {student.get('subjects', '')}"
-                        )
-
-                    st.divider()
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load your students: {e}"
-            )
-
-    # =====================================================
-    # MY TIMETABLE
-    # =====================================================
-
-    elif menu == "My Timetable":
-
-        st.header("📅 My Timetable")
-
-        try:
-
-            result = (
-                supabase
-                .table("timetable")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .order("created_at", desc=True)
-                .execute()
-            )
-
-            if result.data:
-
-                st.dataframe(
-                    result.data,
-                    use_container_width=True
-                )
-
-            else:
-
-                st.info(
-                    "You currently have no timetable entries."
-                )
-
-        except Exception as e:
-
-            st.error(
-                f"Could not load your timetable: {e}"
-            )
-
-    # =====================================================
-    # ATTENDANCE
-    # =====================================================
-
-    elif menu == "Attendance":
-
-        st.header("✅ Attendance")
-
-        try:
-
-            timetable_result = (
-                supabase
-                .table("timetable")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .execute()
-            )
-
-            student_options = sorted(
-                list(
-                    set(
-                        row["student_name"]
-                        for row in timetable_result.data
-                        if row.get("student_name")
-                    )
-                )
-            )
-
-            subject_options = sorted(
-                list(
-                    set(
-                        row["subject"]
-                        for row in timetable_result.data
-                        if row.get("subject")
-                    )
-                )
-            )
-
-        except:
-
-            student_options = []
-            subject_options = []
-
-        if not student_options:
-
-            st.info(
-                "No students have been assigned to you yet."
-            )
-
-        else:
-
-            with st.form("tutor_attendance_form"):
-
-                student_name = st.selectbox(
-                    "Student",
-                    student_options
-                )
-
-                subject = st.selectbox(
-                    "Subject",
-                    subject_options
-                )
-
-                lesson_date = st.date_input(
-                    "Lesson Date",
-                    date.today()
-                )
-
-                status = st.selectbox(
-                    "Attendance Status",
-                    [
-                        "Present",
-                        "Absent",
-                        "Late",
-                        "Excused"
-                    ]
-                )
-
-                notes = st.text_area(
-                    "Notes"
-                )
-
-                submitted = st.form_submit_button(
-                    "Save Attendance"
-                )
-
-                if submitted:
-
-                    try:
-
-                        supabase.table(
-                            "attendance"
-                        ).insert({
-                            "student_name": student_name,
-                            "tutor_name": tutor_name,
-                            "subject": subject,
-                            "lesson_date": str(lesson_date),
-                            "status": status,
-                            "notes": notes
-                        }).execute()
-
-                        st.success(
-                            "Attendance saved successfully."
-                        )
-
-                    except Exception as e:
-
-                        st.error(
-                            f"Could not save attendance: {e}"
-                        )
-
-    # =====================================================
-    # LESSON REPORTS
-    # =====================================================
-
-    elif menu == "Lesson Reports":
-
-        st.header("📝 Lesson Reports")
-
-        try:
-
-            timetable_result = (
-                supabase
-                .table("timetable")
-                .select("*")
-                .eq("tutor_name", tutor_name)
-                .execute()
-            )
-
-            student_options = sorted(
-                list(
-                    set(
-                        row["student_name"]
-                        for row in timetable_result.data
-                        if row.get("student_name")
-                    )
-                )
-            )
-
-            subject_options = sorted(
-                list(
-                    set(
-                        row["subject"]
-                        for row in timetable_result.data
-                        if row.get("subject")
-                    )
-                )
-            )
-
-        except:
-
-            student_options = []
-            subject_options = []
-
-        if not student_options:
-
-            st.info(
-                "No students have been assigned to you yet."
-            )
-
-        else:
-
-            with st.form("tutor_report_form"):
-
-                student_name = st.selectbox(
-                    "Student",
-                    student_options
-                )
-
-                subject = st.selectbox(
-                    "Subject",
-                    subject_options
-                )
-
-                lesson_date = st.date_input(
-                    "Lesson Date",
-                    date.today()
-                )
-
-                topic = st.text_input(
-                    "Topic"
-                )
-
-                lesson_summary = st.text_area(
-                    "Lesson Summary"
-                )
-
-                homework = st.text_area(
-                    "Homework"
-                )
-
-                areas_to_improve = st.text_area(
-                    "Areas to Improve"
-                )
-
-                submitted = st.form_submit_button(
-                    "Save Lesson Report"
-                )
-
-                if submitted:
-
-                    try:
-
-                        supabase.table(
-                            "lesson_reports"
-                        ).insert({
-                            "student_name": student_name,
-                            "tutor_name": tutor_name,
-                            "subject": subject,
-                            "lesson_date": str(lesson_date),
-                            "topic": topic,
-                            "lesson_summary": lesson_summary,
-                            "homework": homework,
-                            "areas_to_improve": areas_to_improve
-                        }).execute()
-
-                        st.success(
-                            "Lesson report saved successfully."
-                        )
-
-                    except Exception as e:
-
-                        st.error(
-                            f"Could not save lesson report: {e}"
-                        )
-
-
-# =========================================================
-# START APPLICATION
-# =========================================================
-
-if st.session_state.user is None:
-
-    login_page()
+    login()
 
 else:
 
@@ -1257,13 +787,15 @@ else:
 
     if role == "admin":
 
-        admin_dashboard()
+        admin_portal()
 
     elif role == "tutor":
 
-        tutor_dashboard()
+        tutor_portal()
 
-    else:
+    elif role == "unknown":
+
+        st.title("📚 Boomatt Academy")
 
         st.error(
             "Your account has not been assigned a portal role yet."
@@ -1273,5 +805,8 @@ else:
             f"Logged in as: {get_current_email()}"
         )
 
-        if st.button("Logout"):
-            logout()
+    else:
+
+        st.error(
+            "We could not determine your portal role."
+        )
