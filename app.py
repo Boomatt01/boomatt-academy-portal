@@ -4,7 +4,8 @@ from datetime import date
 
 
 # ============================================================
-# BOOMATT ACADEMY — PROFESSIONAL PORTAL
+# BOOMATT ACADEMY
+# PROFESSIONAL STREAMLIT PORTAL
 # ============================================================
 
 st.set_page_config(
@@ -16,26 +17,19 @@ st.set_page_config(
 
 
 # ============================================================
-# PROFESSIONAL DESIGN
+# DESIGN
 # ============================================================
 
 st.markdown(
     """
     <style>
 
-    /* ---------- GLOBAL ---------- */
-
     .stApp {
-        background: #F5F7FA;
-    }
-
-    [data-testid="stHeader"] {
-        background: transparent;
+        background-color: #F6F8FB;
     }
 
     [data-testid="stSidebar"] {
-        background: #0F2747;
-        border-right: none;
+        background-color: #102A43;
     }
 
     [data-testid="stSidebar"] * {
@@ -50,196 +44,13 @@ st.markdown(
 
     h1, h2, h3 {
         color: #102A43 !important;
-        font-weight: 700 !important;
     }
-
-    p, label {
-        color: #52606D;
-    }
-
-
-    /* ---------- SIDEBAR ---------- */
-
-    .brand-box {
-        padding: 10px 5px 25px 5px;
-    }
-
-    .brand-icon {
-        font-size: 38px;
-        margin-bottom: 8px;
-    }
-
-    .brand-name {
-        font-size: 23px;
-        font-weight: 800;
-        color: white;
-        letter-spacing: -0.5px;
-    }
-
-    .brand-tagline {
-        font-size: 11px;
-        color: #B8C7D9;
-        line-height: 1.5;
-        margin-top: 5px;
-    }
-
-    .portal-label {
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 1.3px;
-        color: #9FB3C8;
-        margin-top: 12px;
-        margin-bottom: 15px;
-    }
-
-
-    /* ---------- DASHBOARD HERO ---------- */
-
-    .dashboard-hero {
-        background: #102A43;
-        border-radius: 18px;
-        padding: 30px 32px;
-        margin-bottom: 25px;
-    }
-
-    .dashboard-hero-title {
-        color: white;
-        font-size: 30px;
-        font-weight: 750;
-        margin-bottom: 8px;
-    }
-
-    .dashboard-hero-text {
-        color: #D9E2EC;
-        font-size: 14px;
-    }
-
-
-    /* ---------- METRICS ---------- */
-
-    .metric-box {
-        background: white;
-        border: 1px solid #E4E7EB;
-        border-radius: 15px;
-        padding: 21px;
-        min-height: 125px;
-        box-shadow: 0 2px 8px rgba(16, 42, 67, 0.04);
-    }
-
-    .metric-title {
-        font-size: 11px;
-        font-weight: 700;
-        color: #829AB1;
-        letter-spacing: 0.8px;
-    }
-
-    .metric-number {
-        font-size: 30px;
-        font-weight: 800;
-        color: #102A43;
-        margin-top: 8px;
-    }
-
-    .metric-description {
-        font-size: 12px;
-        color: #7B8794;
-        margin-top: 3px;
-    }
-
-
-    /* ---------- SECTION ---------- */
-
-    .section-title {
-        font-size: 19px;
-        font-weight: 750;
-        color: #102A43;
-        margin-top: 28px;
-        margin-bottom: 14px;
-    }
-
-
-    /* ---------- QUICK ACTION CARDS ---------- */
-
-    .action-box {
-        background: white;
-        border: 1px solid #E4E7EB;
-        border-radius: 15px;
-        padding: 20px;
-        min-height: 125px;
-        box-shadow: 0 2px 8px rgba(16, 42, 67, 0.035);
-    }
-
-    .action-icon {
-        font-size: 24px;
-        margin-bottom: 10px;
-    }
-
-    .action-title {
-        color: #102A43;
-        font-size: 15px;
-        font-weight: 700;
-    }
-
-    .action-text {
-        color: #7B8794;
-        font-size: 12px;
-        margin-top: 5px;
-    }
-
-
-    /* ---------- LOGIN ---------- */
-
-    .login-space {
-        height: 80px;
-    }
-
-    .login-brand {
-        text-align: center;
-        font-size: 45px;
-    }
-
-    .login-title {
-        text-align: center;
-        color: #102A43;
-        font-size: 31px;
-        font-weight: 800;
-    }
-
-    .login-subtitle {
-        text-align: center;
-        color: #7B8794;
-        font-size: 14px;
-        margin-bottom: 25px;
-    }
-
-
-    /* ---------- BUTTONS ---------- */
-
-    .stButton > button {
-        border-radius: 9px;
-        min-height: 42px;
-        font-weight: 650;
-    }
-
-
-    /* ---------- FORMS ---------- */
-
-    [data-testid="stForm"] {
-        background: white;
-        border: 1px solid #E4E7EB;
-        border-radius: 15px;
-        padding: 22px;
-    }
-
-
-    /* ---------- FOOTER ---------- */
 
     .footer {
         text-align: center;
-        color: #9FB3C8;
-        font-size: 11px;
-        padding-top: 35px;
-        padding-bottom: 15px;
+        color: #7B8794;
+        font-size: 12px;
+        padding: 30px 0;
     }
 
     </style>
@@ -249,10 +60,11 @@ st.markdown(
 
 
 # ============================================================
-# HELPER FUNCTIONS
+# BASIC FUNCTIONS
 # ============================================================
 
 def current_email():
+
     if "user" not in st.session_state:
         return None
 
@@ -260,6 +72,7 @@ def current_email():
 
 
 def logout():
+
     try:
         supabase.auth.sign_out()
     except Exception:
@@ -270,115 +83,81 @@ def logout():
 
 
 def footer():
-    st.markdown(
-        """
-        <div class="footer">
-            © 2026 Boomatt Academy · Building Confident Learners, One Lesson at a Time
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
-
-def metric_card(title, number, description):
     st.markdown(
-        f"""
-        <div class="metric-box">
-            <div class="metric-title">{title}</div>
-            <div class="metric-number">{number}</div>
-            <div class="metric-description">{description}</div>
-        </div>
-        """,
-        unsafe_allow_html=True
+        "© 2026 Boomatt Academy · Building Confident Learners, One Lesson at a Time"
     )
 
 
 # ============================================================
-# AUTHENTICATION
+# LOGIN
 # ============================================================
 
 def login():
 
-    st.markdown("<div class='login-space'></div>", unsafe_allow_html=True)
+    st.title("📚 Boomatt Academy")
 
-    left, middle, right = st.columns([1, 2, 1])
+    st.subheader(
+        "Building Confident Learners, One Lesson at a Time"
+    )
 
-    with middle:
+    st.write(
+        "Sign in to access your academy portal."
+    )
 
-        st.markdown(
-            "<div class='login-brand'>📚</div>",
-            unsafe_allow_html=True
-        )
+    st.divider()
 
-        st.markdown(
-            "<div class='login-title'>Boomatt Academy</div>",
-            unsafe_allow_html=True
-        )
+    email = st.text_input(
+        "Email address",
+        placeholder="Enter your email"
+    )
 
-        st.markdown(
-            """
-            <div class="login-subtitle">
-                Building Confident Learners, One Lesson at a Time
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    password = st.text_input(
+        "Password",
+        type="password",
+        placeholder="Enter your password"
+    )
 
-        with st.form("login_form"):
+    if st.button(
+        "Sign in",
+        type="primary",
+        use_container_width=True
+    ):
 
-            email = st.text_input(
-                "Email address",
-                placeholder="Enter your email"
+        if not email or not password:
+
+            st.warning(
+                "Please enter your email and password."
             )
 
-            password = st.text_input(
-                "Password",
-                type="password",
-                placeholder="Enter your password"
+            return
+
+        try:
+
+            response = supabase.auth.sign_in_with_password(
+                {
+                    "email": email.strip().lower(),
+                    "password": password
+                }
             )
 
-            submitted = st.form_submit_button(
-                "Sign in",
-                type="primary",
-                use_container_width=True
+            if response.user:
+
+                st.session_state.user = response.user
+
+                st.rerun()
+
+        except Exception as e:
+
+            st.error(
+                f"Login failed: {e}"
             )
-
-            if submitted:
-
-                if not email or not password:
-
-                    st.warning(
-                        "Please enter your email address and password."
-                    )
-
-                else:
-
-                    try:
-
-                        response = supabase.auth.sign_in_with_password(
-                            {
-                                "email": email.strip().lower(),
-                                "password": password
-                            }
-                        )
-
-                        if response.user:
-
-                            st.session_state.user = response.user
-
-                            st.rerun()
-
-                    except Exception as e:
-
-                        st.error(
-                            f"Login failed: {e}"
-                        )
 
     footer()
 
 
 # ============================================================
-# ROLE DETECTION
+# ROLE
 # ============================================================
 
 def get_role():
@@ -390,15 +169,12 @@ def get_role():
 
     email = email.lower().strip()
 
-    # Academy Director
     if email == "boomattolatunji@gmail.com":
         return "admin"
 
-    # Current test tutor
     if email == "test@gmail.com":
         return "tutor"
 
-    # Tutors registered in database
     try:
 
         result = (
@@ -420,36 +196,21 @@ def get_role():
 
 
 # ============================================================
-# SIDEBAR
+# ADMIN SIDEBAR
 # ============================================================
 
 def admin_sidebar():
 
-    st.sidebar.markdown(
-        """
-        <div class="brand-box">
+    st.sidebar.title("📚 Boomatt Academy")
 
-            <div class="brand-icon">
-                📚
-            </div>
-
-            <div class="brand-name">
-                Boomatt Academy
-            </div>
-
-            <div class="brand-tagline">
-                Building Confident Learners,<br>
-                One Lesson at a Time
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.sidebar.caption(
+        "Building Confident Learners, One Lesson at a Time"
     )
 
-    st.sidebar.markdown(
-        "<div class='portal-label'>ACADEMY ADMINISTRATOR</div>",
-        unsafe_allow_html=True
+    st.sidebar.divider()
+
+    st.sidebar.caption(
+        "ACADEMY ADMINISTRATOR"
     )
 
     page = st.sidebar.radio(
@@ -468,56 +229,9 @@ def admin_sidebar():
 
     st.sidebar.divider()
 
-    if st.sidebar.button(
-        "Log out",
-        use_container_width=True
-    ):
-        logout()
-
-    return page
-
-
-def tutor_sidebar():
-
-    st.sidebar.markdown(
-        """
-        <div class="brand-box">
-
-            <div class="brand-icon">
-                📚
-            </div>
-
-            <div class="brand-name">
-                Boomatt Academy
-            </div>
-
-            <div class="brand-tagline">
-                Building Confident Learners,<br>
-                One Lesson at a Time
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.sidebar.write(
+        f"Signed in as: {current_email()}"
     )
-
-    st.sidebar.markdown(
-        "<div class='portal-label'>TUTOR PORTAL</div>",
-        unsafe_allow_html=True
-    )
-
-    page = st.sidebar.radio(
-        "Workspace",
-        [
-            "Dashboard",
-            "My Students",
-            "My Timetable",
-            "Attendance",
-            "Lesson Reports"
-        ]
-    )
-
-    st.sidebar.divider()
 
     if st.sidebar.button(
         "Log out",
@@ -534,23 +248,17 @@ def tutor_sidebar():
 
 def admin_dashboard():
 
-    st.markdown(
-        """
-        <div class="dashboard-hero">
+    st.title("Welcome back, Academy Director 👋")
 
-            <div class="dashboard-hero-title">
-                Welcome back, Academy Director 👋
-            </div>
-
-            <div class="dashboard-hero-text">
-                Manage learners, tutors, lessons and academy
-                operations from one place.
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.write(
+        "Manage learners, tutors, lessons and academy operations from one place."
     )
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # DATABASE COUNTS
+    # --------------------------------------------------------
 
     try:
 
@@ -585,29 +293,29 @@ def admin_dashboard():
         c1, c2, c3, c4 = st.columns(4)
 
         with c1:
-            metric_card(
-                "STUDENTS",
+            st.metric(
+                "Students",
                 len(students.data or []),
                 "Learners in the academy"
             )
 
         with c2:
-            metric_card(
-                "TUTORS",
+            st.metric(
+                "Tutors",
                 len(tutors.data or []),
                 "Teaching team"
             )
 
         with c3:
-            metric_card(
-                "PARENTS",
+            st.metric(
+                "Parents",
                 len(parents.data or []),
                 "Parent records"
             )
 
         with c4:
-            metric_card(
-                "LESSONS",
+            st.metric(
+                "Lessons",
                 len(lessons.data or []),
                 "Timetable entries"
             )
@@ -618,69 +326,51 @@ def admin_dashboard():
             f"Could not load dashboard: {e}"
         )
 
-    st.markdown(
-        "<div class='section-title'>Academy workspace</div>",
-        unsafe_allow_html=True
-    )
+    # --------------------------------------------------------
+    # WORKSPACE
+    # --------------------------------------------------------
+
+    st.subheader("Academy workspace")
 
     c1, c2, c3, c4 = st.columns(4)
 
-    actions = [
-        (
-            c1,
-            "👨‍🎓",
-            "Students",
+    with c1:
+
+        st.info(
+            "👨‍🎓\n\n"
+            "**Students**\n\n"
             "Manage learner records."
-        ),
-        (
-            c2,
-            "👨‍🏫",
-            "Tutors",
+        )
+
+    with c2:
+
+        st.info(
+            "👨‍🏫\n\n"
+            "**Tutors**\n\n"
             "Manage your teaching team."
-        ),
-        (
-            c3,
-            "📅",
-            "Timetable",
+        )
+
+    with c3:
+
+        st.info(
+            "📅\n\n"
+            "**Timetable**\n\n"
             "Organise lessons and schedules."
-        ),
-        (
-            c4,
-            "📖",
-            "Reports",
+        )
+
+    with c4:
+
+        st.info(
+            "📖\n\n"
+            "**Reports**\n\n"
             "Track teaching and learning."
         )
-    ]
 
-    for column, icon, title, description in actions:
+    # --------------------------------------------------------
+    # RECENT TIMETABLE
+    # --------------------------------------------------------
 
-        with column:
-
-            st.markdown(
-                f"""
-                <div class="action-box">
-
-                    <div class="action-icon">
-                        {icon}
-                    </div>
-
-                    <div class="action-title">
-                        {title}
-                    </div>
-
-                    <div class="action-text">
-                        {description}
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-    st.markdown(
-        "<div class='section-title'>Recent timetable</div>",
-        unsafe_allow_html=True
-    )
+    st.subheader("Recent timetable")
 
     try:
 
@@ -746,8 +436,7 @@ def admin_students():
 
         submitted = st.form_submit_button(
             "Add student",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -781,7 +470,7 @@ def admin_students():
                         f"Could not add student: {e}"
                     )
 
-    st.markdown("### Current students")
+    st.subheader("Current students")
 
     try:
 
@@ -846,8 +535,7 @@ def admin_tutors():
 
         submitted = st.form_submit_button(
             "Add tutor",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -881,7 +569,7 @@ def admin_tutors():
                         f"Could not add tutor: {e}"
                     )
 
-    st.markdown("### Current tutors")
+    st.subheader("Current tutors")
 
     try:
 
@@ -942,41 +630,32 @@ def admin_parents():
 
         submitted = st.form_submit_button(
             "Add parent",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
 
-            if not full_name:
+            try:
 
-                st.warning(
-                    "Please enter the parent's name."
+                supabase.table("parents").insert(
+                    {
+                        "full_name": full_name,
+                        "email": email,
+                        "phone": phone
+                    }
+                ).execute()
+
+                st.success(
+                    f"{full_name} has been added successfully."
                 )
 
-            else:
+            except Exception as e:
 
-                try:
+                st.error(
+                    f"Could not add parent: {e}"
+                )
 
-                    supabase.table("parents").insert(
-                        {
-                            "full_name": full_name,
-                            "email": email,
-                            "phone": phone
-                        }
-                    ).execute()
-
-                    st.success(
-                        f"{full_name} has been added successfully."
-                    )
-
-                except Exception as e:
-
-                    st.error(
-                        f"Could not add parent: {e}"
-                    )
-
-    st.markdown("### Current parents")
+    st.subheader("Current parents")
 
     try:
 
@@ -1053,15 +732,13 @@ def admin_timetable():
         with c1:
 
             start_time = st.text_input(
-                "Start time",
-                placeholder="6:00 PM"
+                "Start time"
             )
 
         with c2:
 
             end_time = st.text_input(
-                "End time",
-                placeholder="7:00 PM"
+                "End time"
             )
 
         status = st.selectbox(
@@ -1076,8 +753,7 @@ def admin_timetable():
 
         submitted = st.form_submit_button(
             "Add timetable entry",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -1106,7 +782,7 @@ def admin_timetable():
                     f"Could not add timetable entry: {e}"
                 )
 
-    st.markdown("### Current timetable")
+    st.subheader("Current timetable")
 
     try:
 
@@ -1148,7 +824,7 @@ def admin_attendance():
     st.title("Attendance")
 
     st.caption(
-        "Record and monitor lesson attendance."
+        "Record and review lesson attendance."
     )
 
     with st.form("attendance_form"):
@@ -1185,8 +861,7 @@ def admin_attendance():
 
         submitted = st.form_submit_button(
             "Save attendance",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -1214,7 +889,7 @@ def admin_attendance():
                     f"Could not save attendance: {e}"
                 )
 
-    st.markdown("### Attendance records")
+    st.subheader("Attendance records")
 
     try:
 
@@ -1296,8 +971,7 @@ def admin_reports():
 
         submitted = st.form_submit_button(
             "Save lesson report",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -1327,7 +1001,7 @@ def admin_reports():
                     f"Could not save lesson report: {e}"
                 )
 
-    st.markdown("### Lesson reports")
+    st.subheader("Lesson reports")
 
     try:
 
@@ -1412,8 +1086,7 @@ def admin_payments():
 
         submitted = st.form_submit_button(
             "Save payment",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -1442,7 +1115,7 @@ def admin_payments():
                     f"Could not save payment: {e}"
                 )
 
-    st.markdown("### Payment records")
+    st.subheader("Payment records")
 
     try:
 
@@ -1511,6 +1184,50 @@ def admin_portal():
 
 
 # ============================================================
+# TUTOR SIDEBAR
+# ============================================================
+
+def tutor_sidebar():
+
+    st.sidebar.title("📚 Boomatt Academy")
+
+    st.sidebar.caption(
+        "Building Confident Learners, One Lesson at a Time"
+    )
+
+    st.sidebar.divider()
+
+    st.sidebar.caption(
+        "TUTOR PORTAL"
+    )
+
+    page = st.sidebar.radio(
+        "Workspace",
+        [
+            "Dashboard",
+            "My Students",
+            "My Timetable",
+            "Attendance",
+            "Lesson Reports"
+        ]
+    )
+
+    st.sidebar.divider()
+
+    st.sidebar.write(
+        f"Signed in as: {current_email()}"
+    )
+
+    if st.sidebar.button(
+        "Log out",
+        use_container_width=True
+    ):
+        logout()
+
+    return page
+
+
+# ============================================================
 # TUTOR PROFILE
 # ============================================================
 
@@ -1555,22 +1272,15 @@ def tutor_dashboard(tutor):
         "Tutor"
     )
 
-    st.markdown(
-        f"""
-        <div class="dashboard-hero">
-
-            <div class="dashboard-hero-title">
-                Welcome, {tutor_name} 👋
-            </div>
-
-            <div class="dashboard-hero-text">
-                Your Boomatt Academy teaching workspace.
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.title(
+        f"Welcome, {tutor_name} 👋"
     )
+
+    st.write(
+        "Your Boomatt Academy teaching workspace."
+    )
+
+    st.divider()
 
     try:
 
@@ -1599,84 +1309,31 @@ def tutor_dashboard(tutor):
         c1, c2, c3 = st.columns(3)
 
         with c1:
-            metric_card(
-                "MY STUDENTS",
-                len(students),
-                "Learners assigned to you"
+
+            st.metric(
+                "My Students",
+                len(students)
             )
 
         with c2:
-            metric_card(
-                "MY LESSONS",
-                len(timetable.data or []),
-                "Scheduled lessons"
+
+            st.metric(
+                "My Lessons",
+                len(timetable.data or [])
             )
 
         with c3:
-            metric_card(
-                "REPORTS",
-                len(reports.data or []),
-                "Reports submitted"
+
+            st.metric(
+                "Lesson Reports",
+                len(reports.data or [])
             )
 
     except Exception as e:
 
         st.error(
-            f"Could not load tutor overview: {e}"
+            f"Could not load tutor dashboard: {e}"
         )
-
-    st.markdown(
-        "<div class='section-title'>Your workspace</div>",
-        unsafe_allow_html=True
-    )
-
-    c1, c2, c3 = st.columns(3)
-
-    actions = [
-        (
-            c1,
-            "👨‍🎓",
-            "My Students",
-            "View learners assigned to you."
-        ),
-        (
-            c2,
-            "📅",
-            "My Timetable",
-            "View your teaching schedule."
-        ),
-        (
-            c3,
-            "📝",
-            "Lesson Reports",
-            "Record learning and homework."
-        )
-    ]
-
-    for column, icon, title, description in actions:
-
-        with column:
-
-            st.markdown(
-                f"""
-                <div class="action-box">
-
-                    <div class="action-icon">
-                        {icon}
-                    </div>
-
-                    <div class="action-title">
-                        {title}
-                    </div>
-
-                    <div class="action-text">
-                        {description}
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
 
 
 # ============================================================
@@ -1693,7 +1350,7 @@ def tutor_students(tutor):
     st.title("My Students")
 
     st.caption(
-        "Learners currently assigned to your timetable."
+        "Learners currently assigned to you."
     )
 
     try:
@@ -1724,47 +1381,70 @@ def tutor_students(tutor):
 
         for student in students:
 
-            with st.container(border=True):
+            st.subheader(
+                student
+            )
 
-                st.subheader(student)
+            try:
 
-                try:
+                info = (
+                    supabase
+                    .table("Student")
+                    .select("*")
+                    .eq("full_name", student)
+                    .limit(1)
+                    .execute()
+                )
 
-                    info = (
-                        supabase
-                        .table("Student")
-                        .select("*")
-                        .eq("full_name", student)
-                        .limit(1)
-                        .execute()
-                    )
+                if info.data:
 
-                    if info.data:
+                    data = info.data[0]
 
-                        data = info.data[0]
+                    c1, c2, c3 = st.columns(3)
 
-                        c1, c2, c3 = st.columns(3)
+                    with c1:
 
-                        with c1:
-                            st.write(
-                                f"**Year / Grade**\n\n"
-                                f"{data.get('year_grade', '')}"
+                        st.write(
+                            "**Year / Grade**"
+                        )
+
+                        st.write(
+                            data.get(
+                                "year_grade",
+                                ""
                             )
+                        )
 
-                        with c2:
-                            st.write(
-                                f"**School**\n\n"
-                                f"{data.get('school', '')}"
+                    with c2:
+
+                        st.write(
+                            "**School**"
+                        )
+
+                        st.write(
+                            data.get(
+                                "school",
+                                ""
                             )
+                        )
 
-                        with c3:
-                            st.write(
-                                f"**Subjects**\n\n"
-                                f"{data.get('subjects', '')}"
+                    with c3:
+
+                        st.write(
+                            "**Subjects**"
+                        )
+
+                        st.write(
+                            data.get(
+                                "subjects",
+                                ""
                             )
+                        )
 
-                except Exception:
-                    pass
+            except Exception:
+                pass
+
+            st.divider()
 
     except Exception as e:
 
@@ -1797,7 +1477,7 @@ def tutor_timetable(tutor):
             .table("timetable")
             .select("*")
             .eq("tutor_name", tutor_name)
-            .order("created_at", desc=False)
+            .order("created_at")
             .execute()
         )
 
@@ -1835,10 +1515,6 @@ def tutor_attendance(tutor):
 
     st.title("Attendance")
 
-    st.caption(
-        "Record attendance for your lessons."
-    )
-
     with st.form("tutor_attendance_form"):
 
         student_name = st.text_input(
@@ -1869,8 +1545,7 @@ def tutor_attendance(tutor):
 
         submitted = st.form_submit_button(
             "Save attendance",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -1898,39 +1573,6 @@ def tutor_attendance(tutor):
                     f"Could not save attendance: {e}"
                 )
 
-    st.markdown("### My attendance records")
-
-    try:
-
-        result = (
-            supabase
-            .table("attendance")
-            .select("*")
-            .eq("tutor_name", tutor_name)
-            .order("lesson_date", desc=True)
-            .execute()
-        )
-
-        if result.data:
-
-            st.dataframe(
-                result.data,
-                use_container_width=True,
-                hide_index=True
-            )
-
-        else:
-
-            st.info(
-                "You have not recorded any attendance yet."
-            )
-
-    except Exception as e:
-
-        st.error(
-            f"Could not load attendance: {e}"
-        )
-
 
 # ============================================================
 # TUTOR REPORTS
@@ -1946,7 +1588,7 @@ def tutor_reports(tutor):
     st.title("Lesson Reports")
 
     st.caption(
-        "Record what was taught, learner progress and homework."
+        "Record lesson progress, homework and areas for improvement."
     )
 
     with st.form("tutor_report_form"):
@@ -1982,8 +1624,7 @@ def tutor_reports(tutor):
 
         submitted = st.form_submit_button(
             "Submit lesson report",
-            type="primary",
-            use_container_width=True
+            type="primary"
         )
 
         if submitted:
@@ -2012,39 +1653,6 @@ def tutor_reports(tutor):
                 st.error(
                     f"Could not submit lesson report: {e}"
                 )
-
-    st.markdown("### My lesson reports")
-
-    try:
-
-        result = (
-            supabase
-            .table("lesson_reports")
-            .select("*")
-            .eq("tutor_name", tutor_name)
-            .order("lesson_date", desc=True)
-            .execute()
-        )
-
-        if result.data:
-
-            st.dataframe(
-                result.data,
-                use_container_width=True,
-                hide_index=True
-            )
-
-        else:
-
-            st.info(
-                "You have not submitted any lesson reports yet."
-            )
-
-    except Exception as e:
-
-        st.error(
-            f"Could not load lesson reports: {e}"
-        )
 
 
 # ============================================================
@@ -2093,7 +1701,7 @@ def tutor_portal():
 
 
 # ============================================================
-# APPLICATION ENTRY
+# APPLICATION START
 # ============================================================
 
 if "user" not in st.session_state:
@@ -2114,7 +1722,7 @@ else:
 
     else:
 
-        st.title("Boomatt Academy")
+        st.title("📚 Boomatt Academy")
 
         st.error(
             "This account has not been assigned a portal role."
