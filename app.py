@@ -1,9 +1,13 @@
 import streamlit as st
+from supabase_client import supabase
 
 st.set_page_config(
     page_title="Boomatt Academy | Admin Portal",
     page_icon="📚",
     layout="wide"
+)
+
+st.success("Supabase connection loaded successfully.")
 )
 
 # -----------------------------
