@@ -5,7 +5,7 @@ from datetime import date
 
 # ============================================================
 # BOOMATT ACADEMY
-# PROFESSIONAL STREAMLIT PORTAL
+# MASTER PORTAL
 # ============================================================
 
 st.set_page_config(
@@ -17,40 +17,60 @@ st.set_page_config(
 
 
 # ============================================================
-# DESIGN
+# GLOBAL DESIGN
 # ============================================================
 
 st.markdown(
     """
     <style>
 
+    /* Page */
     .stApp {
-        background-color: #F6F8FB;
-    }
-
-    [data-testid="stSidebar"] {
-        background-color: #102A43;
-    }
-
-    [data-testid="stSidebar"] * {
-        color: white;
+        background: #F6F8FC;
     }
 
     .block-container {
-        max-width: 1400px;
-        padding-top: 2rem;
+        max-width: 1450px;
+        padding-top: 1.8rem;
         padding-bottom: 3rem;
     }
 
-    h1, h2, h3 {
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background: #102A43;
+    }
+
+    [data-testid="stSidebar"] * {
+        color: #FFFFFF;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
         color: #102A43 !important;
     }
 
-    .footer {
+    /* Buttons */
+    .stButton > button {
+        border-radius: 9px;
+        font-weight: 600;
+        min-height: 40px;
+    }
+
+    /* Forms */
+    [data-testid="stForm"] {
+        background: #FFFFFF;
+        border: 1px solid #E3E8EF;
+        border-radius: 14px;
+        padding: 22px;
+    }
+
+    /* Footer */
+    .boomatt-footer {
         text-align: center;
-        color: #7B8794;
+        color: #829AB1;
         font-size: 12px;
-        padding: 30px 0;
+        margin-top: 40px;
+        padding: 20px 0;
     }
 
     </style>
@@ -60,19 +80,16 @@ st.markdown(
 
 
 # ============================================================
-# BASIC FUNCTIONS
+# GENERAL FUNCTIONS
 # ============================================================
 
 def current_email():
-
     if "user" not in st.session_state:
         return None
-
     return st.session_state.user.email
 
 
 def logout():
-
     try:
         supabase.auth.sign_out()
     except Exception:
@@ -83,9 +100,13 @@ def logout():
 
 
 def footer():
-
     st.markdown(
-        "© 2026 Boomatt Academy · Building Confident Learners, One Lesson at a Time"
+        """
+        <div class="boomatt-footer">
+            © 2026 Boomatt Academy · Building Confident Learners, One Lesson at a Time
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 
@@ -95,69 +116,82 @@ def footer():
 
 def login():
 
-    st.title("📚 Boomatt Academy")
+    st.write("")
+    st.write("")
+    st.write("")
 
-    st.subheader(
-        "Building Confident Learners, One Lesson at a Time"
-    )
+    left, centre, right = st.columns([1, 2, 1])
 
-    st.write(
-        "Sign in to access your academy portal."
-    )
+    with centre:
 
-    st.divider()
+        st.markdown(
+            "<h1 style='text-align:center;'>📚</h1>",
+            unsafe_allow_html=True
+        )
 
-    email = st.text_input(
-        "Email address",
-        placeholder="Enter your email"
-    )
+        st.title("Boomatt Academy")
 
-    password = st.text_input(
-        "Password",
-        type="password",
-        placeholder="Enter your password"
-    )
+        st.markdown(
+            "<p style='text-align:center;'>Building Confident Learners, One Lesson at a Time</p>",
+            unsafe_allow_html=True
+        )
 
-    if st.button(
-        "Sign in",
-        type="primary",
-        use_container_width=True
-    ):
+        st.divider()
 
-        if not email or not password:
+        st.subheader("Sign in")
 
-            st.warning(
-                "Please enter your email and password."
-            )
+        email = st.text_input(
+            "Email address",
+            placeholder="Enter your email"
+        )
 
-            return
+        password = st.text_input(
+            "Password",
+            type="password",
+            placeholder="Enter your password"
+        )
 
-        try:
+        if st.button(
+            "Sign in to portal",
+            type="primary",
+            use_container_width=True
+        ):
 
-            response = supabase.auth.sign_in_with_password(
-                {
-                    "email": email.strip().lower(),
-                    "password": password
-                }
-            )
+            if not email or not password:
 
-            if response.user:
+                st.warning(
+                    "Please enter your email address and password."
+                )
 
-                st.session_state.user = response.user
+                return
 
-                st.rerun()
+            try:
 
-        except Exception as e:
+                response = supabase.auth.sign_in_with_password(
+                    {
+                        "email": email.strip().lower(),
+                        "password": password
+                    }
+                )
 
-            st.error(
-                f"Login failed: {e}"
-            )
+                if response.user:
+
+                    st.session_state.user = response.user
+                    st.rerun()
+
+            except Exception as e:
+
+                st.error(
+                    "Login failed. Please check your email and password."
+                )
+
+                st.caption(str(e))
 
     footer()
 
 
 # ============================================================
-# ROLE
+# ROLE DETECTION
 # ============================================================
 
 def get_role():
@@ -169,18 +203,21 @@ def get_role():
 
     email = email.lower().strip()
 
+    # Academy Director
     if email == "boomattolatunji@gmail.com":
         return "admin"
 
+    # Existing test tutor
     if email == "test@gmail.com":
         return "tutor"
 
+    # Registered tutors
     try:
 
         result = (
             supabase
             .table("tutors")
-            .select("*")
+            .select("id")
             .eq("email", email)
             .limit(1)
             .execute()
@@ -201,7 +238,11 @@ def get_role():
 
 def admin_sidebar():
 
-    st.sidebar.title("📚 Boomatt Academy")
+    st.sidebar.title("📚 Boomatt")
+
+    st.sidebar.caption(
+        "Boomatt Academy"
+    )
 
     st.sidebar.caption(
         "Building Confident Learners, One Lesson at a Time"
@@ -229,8 +270,8 @@ def admin_sidebar():
 
     st.sidebar.divider()
 
-    st.sidebar.write(
-        f"Signed in as: {current_email()}"
+    st.sidebar.caption(
+        current_email()
     )
 
     if st.sidebar.button(
@@ -251,13 +292,13 @@ def admin_dashboard():
     st.title("Welcome back, Academy Director 👋")
 
     st.write(
-        "Manage learners, tutors, lessons and academy operations from one place."
+        "Your central workspace for managing learners, tutors, lessons and academy operations."
     )
 
     st.divider()
 
     # --------------------------------------------------------
-    # DATABASE COUNTS
+    # COUNTS
     # --------------------------------------------------------
 
     try:
@@ -283,7 +324,7 @@ def admin_dashboard():
             .execute()
         )
 
-        lessons = (
+        timetable = (
             supabase
             .table("timetable")
             .select("id")
@@ -295,79 +336,67 @@ def admin_dashboard():
         with c1:
             st.metric(
                 "Students",
-                len(students.data or []),
-                "Learners in the academy"
+                len(students.data or [])
             )
 
         with c2:
             st.metric(
                 "Tutors",
-                len(tutors.data or []),
-                "Teaching team"
+                len(tutors.data or [])
             )
 
         with c3:
             st.metric(
                 "Parents",
-                len(parents.data or []),
-                "Parent records"
+                len(parents.data or [])
             )
 
         with c4:
             st.metric(
-                "Lessons",
-                len(lessons.data or []),
-                "Timetable entries"
+                "Scheduled lessons",
+                len(timetable.data or [])
             )
 
     except Exception as e:
 
         st.error(
-            f"Could not load dashboard: {e}"
+            f"Dashboard could not load completely: {e}"
         )
 
     # --------------------------------------------------------
-    # WORKSPACE
+    # QUICK ACCESS
     # --------------------------------------------------------
 
-    st.subheader("Academy workspace")
+    st.subheader("Quick access")
 
-    c1, c2, c3, c4 = st.columns(4)
+    q1, q2, q3, q4 = st.columns(4)
 
-    with c1:
-
+    with q1:
         st.info(
-            "👨‍🎓\n\n"
-            "**Students**\n\n"
-            "Manage learner records."
+            "👨‍🎓 **Students**\n\n"
+            "Create and manage learner records."
         )
 
-    with c2:
-
+    with q2:
         st.info(
-            "👨‍🏫\n\n"
-            "**Tutors**\n\n"
+            "👨‍🏫 **Tutors**\n\n"
             "Manage your teaching team."
         )
 
-    with c3:
-
+    with q3:
         st.info(
-            "📅\n\n"
-            "**Timetable**\n\n"
+            "📅 **Timetable**\n\n"
             "Organise lessons and schedules."
         )
 
-    with c4:
-
+    with q4:
         st.info(
-            "📖\n\n"
-            "**Reports**\n\n"
-            "Track teaching and learning."
+            "📖 **Reports**\n\n"
+            "Monitor teaching and learning."
         )
 
     # --------------------------------------------------------
-    # RECENT TIMETABLE
+    # TIMETABLE
     # --------------------------------------------------------
 
     st.subheader("Recent timetable")
@@ -394,13 +423,50 @@ def admin_dashboard():
         else:
 
             st.info(
-                "No timetable entries have been added yet."
+                "Your timetable is currently empty."
             )
 
     except Exception as e:
 
         st.error(
             f"Could not load timetable: {e}"
+        )
+
+    # --------------------------------------------------------
+    # RECENT REPORTS
+    # --------------------------------------------------------
+
+    st.subheader("Recent lesson reports")
+
+    try:
+
+        result = (
+            supabase
+            .table("lesson_reports")
+            .select("*")
+            .order("lesson_date", desc=True)
+            .limit(5)
+            .execute()
+        )
+
+        if result.data:
+
+            st.dataframe(
+                result.data,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        else:
+
+            st.info(
+                "No lesson reports have been submitted yet."
+            )
+
+    except Exception as e:
+
+        st.error(
+            f"Could not load lesson reports: {e}"
         )
 
 
@@ -417,6 +483,8 @@ def admin_students():
     )
 
     with st.form("student_form"):
+
+        st.subheader("Add learner")
 
         full_name = st.text_input(
             "Student name"
@@ -470,7 +538,7 @@ def admin_students():
                         f"Could not add student: {e}"
                     )
 
-    st.subheader("Current students")
+    st.subheader("Learner records")
 
     try:
 
@@ -517,6 +585,8 @@ def admin_tutors():
 
     with st.form("tutor_form"):
 
+        st.subheader("Add tutor")
+
         full_name = st.text_input(
             "Tutor name"
         )
@@ -543,7 +613,7 @@ def admin_tutors():
             if not full_name or not email:
 
                 st.warning(
-                    "Please enter the tutor's name and email."
+                    "Tutor name and email are required."
                 )
 
             else:
@@ -553,7 +623,7 @@ def admin_tutors():
                     supabase.table("tutors").insert(
                         {
                             "full_name": full_name,
-                            "email": email.lower().strip(),
+                            "email": email.strip().lower(),
                             "subjects": subjects,
                             "qualification": qualification
                         }
@@ -569,7 +639,7 @@ def admin_tutors():
                         f"Could not add tutor: {e}"
                     )
 
-    st.subheader("Current tutors")
+    st.subheader("Teaching team")
 
     try:
 
@@ -616,6 +686,8 @@ def admin_parents():
 
     with st.form("parent_form"):
 
+        st.subheader("Add parent")
+
         full_name = st.text_input(
             "Parent name"
         )
@@ -635,27 +707,35 @@ def admin_parents():
 
         if submitted:
 
-            try:
+            if not full_name:
 
-                supabase.table("parents").insert(
-                    {
-                        "full_name": full_name,
-                        "email": email,
-                        "phone": phone
-                    }
-                ).execute()
-
-                st.success(
-                    f"{full_name} has been added successfully."
+                st.warning(
+                    "Please enter the parent's name."
                 )
 
-            except Exception as e:
+            else:
 
-                st.error(
-                    f"Could not add parent: {e}"
-                )
+                try:
 
-    st.subheader("Current parents")
+                    supabase.table("parents").insert(
+                        {
+                            "full_name": full_name,
+                            "email": email,
+                            "phone": phone
+                        }
+                    ).execute()
+
+                    st.success(
+                        f"{full_name} has been added successfully."
+                    )
+
+                except Exception as e:
+
+                    st.error(
+                        f"Could not add parent: {e}"
+                    )
+
+    st.subheader("Parent records")
 
     try:
 
@@ -702,6 +782,8 @@ def admin_timetable():
 
     with st.form("timetable_form"):
 
+        st.subheader("Schedule a lesson")
+
         student_name = st.text_input(
             "Student name"
         )
@@ -732,13 +814,15 @@ def admin_timetable():
         with c1:
 
             start_time = st.text_input(
-                "Start time"
+                "Start time",
+                placeholder="6:00 PM"
             )
 
         with c2:
 
             end_time = st.text_input(
-                "End time"
+                "End time",
+                placeholder="7:00 PM"
             )
 
         status = st.selectbox(
@@ -752,7 +836,7 @@ def admin_timetable():
         )
 
         submitted = st.form_submit_button(
-            "Add timetable entry",
+            "Add lesson",
             type="primary"
         )
 
@@ -773,16 +857,16 @@ def admin_timetable():
                 ).execute()
 
                 st.success(
-                    "Timetable entry added successfully."
+                    "Lesson has been added to the timetable."
                 )
 
             except Exception as e:
 
                 st.error(
-                    f"Could not add timetable entry: {e}"
+                    f"Could not add lesson: {e}"
                 )
 
-    st.subheader("Current timetable")
+    st.subheader("Academy timetable")
 
     try:
 
@@ -805,7 +889,7 @@ def admin_timetable():
         else:
 
             st.info(
-                "No timetable entries yet."
+                "No lessons have been scheduled yet."
             )
 
     except Exception as e:
@@ -824,10 +908,12 @@ def admin_attendance():
     st.title("Attendance")
 
     st.caption(
-        "Record and review lesson attendance."
+        "Record and review learner attendance."
     )
 
     with st.form("attendance_form"):
+
+        st.subheader("Record attendance")
 
         student_name = st.text_input(
             "Student name"
@@ -931,10 +1017,12 @@ def admin_reports():
     st.title("Lesson Reports")
 
     st.caption(
-        "Review teaching, learning progress and homework."
+        "Monitor lesson delivery, progress and homework."
     )
 
     with st.form("lesson_report_form"):
+
+        st.subheader("Create lesson report")
 
         student_name = st.text_input(
             "Student name"
@@ -1047,6 +1135,8 @@ def admin_payments():
     )
 
     with st.form("payment_form"):
+
+        st.subheader("Record payment")
 
         parent_name = st.text_input(
             "Parent name"
@@ -1189,7 +1279,11 @@ def admin_portal():
 
 def tutor_sidebar():
 
-    st.sidebar.title("📚 Boomatt Academy")
+    st.sidebar.title("📚 Boomatt")
+
+    st.sidebar.caption(
+        "Boomatt Academy"
+    )
 
     st.sidebar.caption(
         "Building Confident Learners, One Lesson at a Time"
@@ -1214,8 +1308,8 @@ def tutor_sidebar():
 
     st.sidebar.divider()
 
-    st.sidebar.write(
-        f"Signed in as: {current_email()}"
+    st.sidebar.caption(
+        current_email()
     )
 
     if st.sidebar.button(
@@ -1309,21 +1403,18 @@ def tutor_dashboard(tutor):
         c1, c2, c3 = st.columns(3)
 
         with c1:
-
             st.metric(
                 "My Students",
                 len(students)
             )
 
         with c2:
-
             st.metric(
                 "My Lessons",
                 len(timetable.data or [])
             )
 
         with c3:
-
             st.metric(
                 "Lesson Reports",
                 len(reports.data or [])
@@ -1334,6 +1425,27 @@ def tutor_dashboard(tutor):
         st.error(
             f"Could not load tutor dashboard: {e}"
         )
+
+    st.subheader("My timetable")
+
+    try:
+
+        if timetable.data:
+
+            st.dataframe(
+                timetable.data,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        else:
+
+            st.info(
+                "No lessons have been assigned to you yet."
+            )
+
+    except Exception:
+        pass
 
 
 # ============================================================
@@ -1381,9 +1493,7 @@ def tutor_students(tutor):
 
         for student in students:
 
-            st.subheader(
-                student
-            )
+            st.subheader(student)
 
             try:
 
@@ -1403,42 +1513,21 @@ def tutor_students(tutor):
                     c1, c2, c3 = st.columns(3)
 
                     with c1:
-
+                        st.write("**Year / Grade**")
                         st.write(
-                            "**Year / Grade**"
-                        )
-
-                        st.write(
-                            data.get(
-                                "year_grade",
-                                ""
-                            )
+                            data.get("year_grade", "")
                         )
 
                     with c2:
-
+                        st.write("**School**")
                         st.write(
-                            "**School**"
-                        )
-
-                        st.write(
-                            data.get(
-                                "school",
-                                ""
-                            )
+                            data.get("school", "")
                         )
 
                     with c3:
-
+                        st.write("**Subjects**")
                         st.write(
-                            "**Subjects**"
-                        )
-
-                        st.write(
-                            data.get(
-                                "subjects",
-                                ""
-                            )
+                            data.get("subjects", "")
                         )
 
             except Exception:
@@ -1514,6 +1603,10 @@ def tutor_attendance(tutor):
     )
 
     st.title("Attendance")
+
+    st.caption(
+        "Record attendance for your lessons."
+    )
 
     with st.form("tutor_attendance_form"):
 
@@ -1654,6 +1747,39 @@ def tutor_reports(tutor):
                     f"Could not submit lesson report: {e}"
                 )
 
+    st.subheader("My submitted reports")
+
+    try:
+
+        result = (
+            supabase
+            .table("lesson_reports")
+            .select("*")
+            .eq("tutor_name", tutor_name)
+            .order("lesson_date", desc=True)
+            .execute()
+        )
+
+        if result.data:
+
+            st.dataframe(
+                result.data,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        else:
+
+            st.info(
+                "You have not submitted any lesson reports yet."
+            )
+
+    except Exception as e:
+
+        st.error(
+            f"Could not load your reports: {e}"
+        )
+
 
 # ============================================================
 # TUTOR PORTAL
@@ -1678,30 +1804,25 @@ def tutor_portal():
     page = tutor_sidebar()
 
     if page == "Dashboard":
-
         tutor_dashboard(tutor)
 
     elif page == "My Students":
-
         tutor_students(tutor)
 
     elif page == "My Timetable":
-
         tutor_timetable(tutor)
 
     elif page == "Attendance":
-
         tutor_attendance(tutor)
 
     elif page == "Lesson Reports":
-
         tutor_reports(tutor)
 
     footer()
 
 
 # ============================================================
-# APPLICATION START
+# APPLICATION ENTRY
 # ============================================================
 
 if "user" not in st.session_state:
@@ -1733,5 +1854,4 @@ else:
         )
 
         if st.button("Log out"):
-
             logout()
